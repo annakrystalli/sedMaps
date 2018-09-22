@@ -18,12 +18,12 @@ ncdf_stack <- function(path){
 
 #' Stack bands from a third dimension into a single rasterStack
 #'
-#' Stack bands from a third dimension (eg time, depth) into a single rasterStack.
+#' Stack bands from a third dimension (e.g. time, depth) into a single rasterStack.
 #' @param path path to the ncdf file
 #' @param varname single varname for which to extract bands
 #' @param dimension name of dimension from which to extract bands. Check available dimensions with `ncdf_extra_dims()`.
 #'
-#' @return a stack of rasterLayers containing values for `varname`` in each dimensional band.
+#' @return a stack of rasterLayers containing values for `varname` in each dimensional band.
 #' @export
 #'
 #' @examples

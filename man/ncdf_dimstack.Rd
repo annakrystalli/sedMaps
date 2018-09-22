@@ -14,8 +14,8 @@ ncdf_dimstack(path, varname = NULL, dimension)
 \item{dimension}{name of dimension from which to extract bands. Check available dimensions with \code{ncdf_extra_dims()}.}
 }
 \value{
-a stack of rasterLayers containing values for `varname`` in each dimensional band.
+a stack of rasterLayers containing values for \code{varname} in each dimensional band.
 }
 \description{
-Stack bands from a third dimension (eg time, depth) into a single rasterStack.
+Stack bands from a third dimension (e.g. time, depth) into a single rasterStack.
 }
