@@ -17,5 +17,5 @@ ncdf_dimstack(path, varname = NULL, dimension)
 a stack of rasterLayers containing values for \code{varname} in each dimensional band.
 }
 \description{
-Stack bands from a third dimension (eg time, depth) into a single rasterStack.
+Stack bands from a third dimension (e.g. time, depth) into a single rasterStack.
 }
