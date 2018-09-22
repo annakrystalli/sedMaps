@@ -13,7 +13,10 @@ Imports:
     dplyr,
     magrittr,
     leaflet,
-    here
+    here,
+    shinythemes,
+    shiny,
+    sf
 RoxygenNote: 6.1.0
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/annakrystalli/sedMaps
