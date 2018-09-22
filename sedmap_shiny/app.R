@@ -9,81 +9,83 @@
 
 library(shiny)
 library(sedMaps)
+library(dplyr)
+library(leaflet)
+library(htmlwidgets)
+library(htmltools)
 
 
 sed_path <- here::here("data-raw", "nc", "sediment_properties.nc")
 dis_path <- here::here("data-raw", "nc", "monthly_disturbance.nc")
 
-path <- dis_path
-
-sed_rst <- ncdf_stack(sed_path)
-dis_rst <- ncdf_dimstack(dis_path, dimension = "Time") %>% 
-    setNames(month.name[names(.) %>% 
-                            stringr::str_replace("month_", "") %>% 
-                            as.numeric()])
-
-
-raster::animate(dis_rst, pause=0.25,  n=10)
-
-# input - varname
-varname <- "SandPercent"
+data <- "sed"
 
 # input - basemap
 basemaps <- c("Esri.WorldPhysical", "Esri.OceanBasemap")
 basemap <- "Esri.WorldPhysical"
 
 
-
-
+rst <- switch(data,
+              "dis" = {ncdf_dimstack(dis_path, dimension = "Time") %>% 
+                      setNames(month.name[names(.) %>% 
+                                              stringr::str_replace("month_", "") %>% 
+                                              as.numeric()])},
+              "sed" = {ncdf_stack(sed_path)})
 
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
-   
-   # Application title
-   titlePanel("Old Faithful Geyser Data"),
-   
-   # Sidebar with a slider input for number of bins 
-   sidebarLayout(
-      sidebarPanel(
-         sliderInput("bins",
-                     "Number of bins:",
-                     min = 1,
-                     max = 50,
-                     value = 30)
-      ),
-      
-      # Show a plot of the generated distribution
-      mainPanel(
-         plotOutput("distPlot")
-      )
-   )
+ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
+                
+                # Application title
+                titlePanel("Data Explorer"),
+                
+                
+                # Leaflet plot 
+                leafletOutput("leaflet", width = "100%",  height="1000px"),
+                
+                absolutePanel(
+                    top = 70, left = 20, width = 200,
+                    draggable = TRUE,
+                    wellPanel(
+                        h3("Layers"), 
+                        hr(),
+                        # selectors
+                        radioButtons("varname", label = h5("Select layer"),
+                                     choices = names(rst), 
+                                     selected = names(rst)[1]))),
+                absolutePanel(
+                    bottom = 20, right = 20, width = 200,
+                    draggable = TRUE,
+                    wellPanel(opacity = 0.8,
+                        h3("Map tools"),
+                        hr(),
+                        sliderInput("opacity",h5("Layer opacity"),
+                                    min = 0,
+                                    max = 1,
+                                    value = 0.8),
+                        selectInput("option", label = h5("Palette"), 
+                                    choices = list("magma" = "A", "inferno" = "B",
+                                                   "plasma" = "C", "viridis" = "D"), 
+                                    selected = "A"),
+                        selectInput("basemap", label = h5("Basemap"), 
+                                    choices = leaflet::providers, 
+                                    selected = "Esri.OceanBasemap")
+                    )
+                )
 )
+
+
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-   
-   output$map <- renderPlot({
-
-       # subset var
-       r <- raster::subset(sed_rst, subset = varname)
-       
-       # get palette
-       pal <- colorNumeric(viridis::viridis(10), raster::values(r),
-                           na.color = "transparent")
-       # plot
-       leaflet() %>% addTiles()  %>% 
-           addProviderTiles(providers[[basemap]]) %>%
-           addRasterImage(r, colors = pal, opacity = 0.8) %>%
-           addLegend(pal = pal, 
-                     values = values(r),
-                     label = varname,
-                     title = varname)
-       
-       
-       
-       
-   })
+    
+    output$leaflet <- renderLeaflet({
+        
+        lflt_plot(rst, varname = input$varname, label = "Disturbance", 
+                  opacity = input$opacity, option = input$option,
+                  basemap = input$basemap) 
+        
+    })
 }
 
 # Run the application 
