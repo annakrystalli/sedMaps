@@ -37,7 +37,7 @@ rst <- switch(data,
 ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
                 
                 # Application title
-                titlePanel("Data Explorer"),
+                titlePanel("Sedimentary Environment Data Explorer"),
                 
                 
                 # Leaflet plot 
