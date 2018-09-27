@@ -20,11 +20,6 @@ dis_path <- here::here("data-raw", "nc", "monthly_disturbance.nc")
 
 data <- "sed"
 
-# input - basemap
-basemaps <- c("Esri.WorldPhysical", "Esri.OceanBasemap")
-basemap <- "Esri.WorldPhysical"
-
-
 rst <- switch(data,
               "dis" = {ncdf_dimstack(dis_path, dimension = "Time") %>% 
                       setNames(month.name[names(.) %>% 
