@@ -29,10 +29,12 @@ rst <- list(
 
 varnames <- list(sed = names(rst[["sed"]]),
                  dis = names(rst[["dis"]]))
-
 rst <- raster::stack(rst)
 
-names(rst)
+sf_files <- list.files(here::here("data", "sf"), full.names = T)
+system.file("data", sf_files[1], package = "sedMaps")
+sf <- readRDS(sf_files[1])
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
                 
@@ -94,7 +96,11 @@ server <- function(input, output) {
         
         lflt_plot(rst, varname = get_varname(), label = "Disturbance", 
                   opacity = input$opacity, option = input$option,
-                  basemap = input$basemap) 
+                  basemap = input$basemap, sf = sf) %>%
+            lflt_sf(sf, fillColor = "white", 
+                    label = glue::glue("{sf$LABEL}: {sf$INFO}")) %>%
+            leaflet.extras::addDrawToolbar() %>%
+            leaflet::addMeasure()
         
     })
 }

@@ -3,6 +3,7 @@
 export("%>%")
 export(lflt_contour)
 export(lflt_plot)
+export(lflt_sf)
 export(ncdf_band_units)
 export(ncdf_bands)
 export(ncdf_dim)

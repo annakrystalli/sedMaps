@@ -16,7 +16,9 @@ Imports:
     here,
     shinythemes,
     shiny,
-    sf
+    sf,
+    glue,
+    leaflet.extras
 RoxygenNote: 6.1.0
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/annakrystalli/sedMaps
