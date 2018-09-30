@@ -5,7 +5,7 @@
 \title{Title}
 \usage{
 lflt_plot(rst, varname = NULL, basemap = "Esri.OceanBasemap",
-  option = "A", label = NULL, opacity = 0.8, sf = NULL)
+  option = "A", label = NULL, opacity = 0.8)
 }
 \arguments{
 \item{rst}{}

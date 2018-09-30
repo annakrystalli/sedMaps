@@ -79,7 +79,15 @@ ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
                                           selected = "A"),
                               selectInput("basemap", label = h5("Basemap"), 
                                           choices = leaflet::providers, 
-                                          selected = "Esri.OceanBasemap")
+                                          selected = "Esri.OceanBasemap"),
+                              shinydashboard::box(
+                                  width = 12,
+                                  shiny::actionButton( inputId = "clearHighlight",
+                                                             icon = icon( name = "eraser"),
+                                                             label = "Clear the Map",
+                                                             style = "color: #fff; background-color: #D75453; border-color: #C73232"
+                                      ))
+                                  
                     )
                 )
 )
@@ -92,17 +100,64 @@ server <- function(input, output) {
     get_varname <- reactive({switch(input$data,
                                     "sed" = input$varname_sed,
                                     "dis" = input$varname_dis)})
-    output$leaflet <- renderLeaflet({
-        
+    raster_map <- shiny::reactive({
         lflt_plot(rst, varname = get_varname(), label = "Disturbance", 
                   opacity = input$opacity, option = input$option,
-                  basemap = input$basemap, sf = sf) %>%
-            lflt_sf(sf, fillColor = "white", 
-                    label = glue::glue("{sf$LABEL}: {sf$INFO}")) %>%
-            leaflet.extras::addDrawToolbar() %>%
-            leaflet::addMeasure()
+                  basemap = input$basemap)})
+    
+    get_selected <- shiny::reactive({
+        click <- input$leaflet_shape_click
+        if(click$id %in% click.list$ids){
+            click.list$ids[click.list$ids != click$id]
+            }else{
+                c(click.list$ids, click$id)
+            }
+    })
+    
+    
+    output$leaflet <- renderLeaflet({
+    
+        raster_map() %>%
+            lflt_sf(sf, 
+                    fillColor = "white", weight = 1.2, fillOpacity = 0.3, 
+                    label = glue::glue("{sf$LABEL}: {sf$INFO}"), 
+                    group = "click.list") %>%
+            #leaflet.extras::addDrawToolbar() %>%
+            identity()
         
     })
+    
+    click.list <- shiny::reactiveValues(ids = vector())
+    
+    shiny::observeEvent(input$leaflet_shape_click, {
+        
+       click.list$ids <- get_selected()
+        print(click.list$ids)
+        
+        lflt_sf_selected(sf, ids = click.list$ids, 
+                         fillColor = "white", 
+                         label = glue::glue("{sf$LABEL}: {sf$INFO} +"), 
+                         weight = 2.5, fillOpacity = 0.8,
+                         group = "click.list")
+        
+  
+        #} # end of if else statement
+        
+    }) # end of shiny::observeEvent({})
+    
+    shiny::observeEvent(input$clearHighlight, {
+        
+        output$leaflet <- leaflet::renderLeaflet({
+            click.list$ids <- NULL
+            raster_map()  %>%
+                lflt_sf(sf, fillColor = "white", 
+                        weight = 1.2,
+                        label = glue::glue("{sf$LABEL}: {sf$INFO}"), 
+                        group = "click.list", fillOpacity = 0.3) 
+            
+        }) # end of re-rendering $leaflet
+        
+    }) # end of clearHighlight action button logic
 }
 
 # Run the application 

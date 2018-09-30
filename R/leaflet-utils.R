@@ -13,7 +13,7 @@
 #' @examples
 lflt_plot <- function(rst, varname = NULL, basemap = "Esri.OceanBasemap",
                       option = "A", label = NULL,
-                      opacity = 0.8, sf = NULL){
+                      opacity = 0.8){
     
     if(is.null(varname)){ varname <- names(rst)[1]}else{
         varname <- match.arg(varname, choices = names(rst))}
@@ -22,19 +22,13 @@ lflt_plot <- function(rst, varname = NULL, basemap = "Esri.OceanBasemap",
     if(is.null(label)) label <- varname
     # subset var
     r <- raster::subset(rst, subset = varname)
-    #proj <- "+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 +units=m +no_defs "
-    #raster::crs(r) <- proj
-    
-    
-    
+
     # get palette
     pal <- leaflet::colorNumeric(viridis::viridis(100, option = option), 
                                  raster::values(r),
                                  na.color = "transparent")
     # plot
-    leaflet(
-        #options = c(crs = leafletCRS(proj4def = proj))
-    ) %>% 
+    leaflet() %>% 
         addTiles()  %>% 
         addProviderTiles(providers[[basemap]]) %>%
         addRasterImage(r, colors = pal, opacity = opacity) %>%
@@ -50,27 +44,51 @@ lflt_plot <- function(rst, varname = NULL, basemap = "Esri.OceanBasemap",
 #'
 #' @param map leaflet map object
 #' @param sf sf object containing vector data
-#' @param fillOpacity sf polygon fill colour
-#' @param color sf polygon stroke colour
+#' @param pal_f character vector of colors
+#' @param ... additional variables passed to `addPolylines()`.
 #'
 #' @return a leaflet map object with sf vector data overlaid
 #' @export
 #'
 #' @examples
-lflt_sf <- function(map, sf = NULL, fillOpacity = 0.3, ...){
+lflt_sf <- function(map, sf = NULL, pal_f =  topo.colors(10), ...){
     if(is.null(sf)){map}else{
-        factpal <- leaflet::colorFactor(topo.colors(10), as.factor(sf$LABEL))
-        sf <- sf::st_transform(sf, crs = 4326) 
+        sf <- prep_sf(sf)
+        factpal <- lflt_factpal(sf, pal_f)
         map %>%
-            leaflet::addPolygons(data = sf, 
-                                 weight = 1, 
-                                 smoothFactor = 0.5,
-                                 opacity = 0.9, fillOpacity = fillOpacity,
+            mapview::addFeatures(data = sf, 
+                                 layerId = ~LABEL,
+                                 opacity = 0.8, 
                                  color = ~factpal(as.factor(LABEL)),
-                                 highlightOptions = leaflet::highlightOptions(
-                                                      weight = 3,
-                                     bringToFront = TRUE), ...)
+                                 ...)
     }
+}
+
+
+
+#' Highlight selected sf polygons
+#'
+#' @param sf sf object containing vector data
+#' @param ids character vector of selected `LABEL` ids
+#' @param pal_f character vector of colors
+#' @param ... additional variables passed to `addPolylines()`.
+#'
+#' @return 
+#' @export
+#'
+#' @examples
+lflt_sf_selected <- function(sf, ids, pal_f =  topo.colors(10), ...){
+    
+    factpal <- lflt_factpal(sf, pal_f)
+    selected_shapes <- prep_sf(sf) %>% 
+        filter(LABEL %in% ids)
+    
+    leaflet::leafletProxy(mapId = "leaflet") %>%
+        leaflet::addPolygons( data = selected_shapes,
+                      layerId = ~LABEL,
+                      opacity = 0.92, 
+                      color = ~factpal(as.factor(LABEL)), 
+                      ...)
 }
 
 lflt_cor <- function(rst, varname1 = NULL, varname2 = NULL,
@@ -82,24 +100,17 @@ lflt_cor <- function(rst, varname1 = NULL, varname2 = NULL,
     if(is.null(varname2)){ varname2 <- names(rst)[2]}else{
         varname2 <- match.arg(varname2, choices = names(rst))}
     
-    # subset var(raster_stack, 'pearson', na.rm=T)
     r <- raster::layerStats(
         raster::subset(rst, subset = c(varname1, varname2)),
         #raster::subset(rst, subset = varname2)),
         'pearson', na.rm=T)
-    #proj <- "+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 +units=m +no_defs "
-    #raster::crs(r) <- proj
-    
-    
     
     # get palette
     pal <- leaflet::colorNumeric(viridis::viridis(100, option = option), 
                                  raster::values(r),
                                  na.color = "transparent")
     # plot
-    leaflet(
-        #options = c(crs = leafletCRS(proj4def = proj))
-    ) %>% 
+    leaflet()
         addTiles()  %>% 
         addProviderTiles(providers[[basemap]]) %>%
         addRasterImage(r, colors = pal, opacity = opacity) %>%
@@ -128,3 +139,11 @@ lflt_contour <- function(map, r, color = "white", weight = 0.5){
                  weight = weight) 
 }
 
+
+lflt_factpal <- function(sf, pal_f = topo.colors(10)){
+    leaflet::colorFactor(pal_f, as.factor(sf$LABEL))
+}
+
+prep_sf <- function(sf){
+sf %>% sf::st_transform(sf, crs = 4326) 
+}
