@@ -9,7 +9,7 @@ lflt_sf_selected(sf, ids, pal_f = topo.colors(10), ...)
 \arguments{
 \item{sf}{sf object containing vector data}
 
-\item{ids}{character vector of selected \code{LABEL} ids}
+\item{ids}{character vector of selected \code{id} ids}
 
 \item{pal_f}{character vector of colors}
 
