@@ -14,25 +14,11 @@ library(leaflet)
 library(htmlwidgets)
 library(htmltools)
 
-
-sed_path <- here::here("data-raw", "nc", "sediment_properties.nc")
-dis_path <- here::here("data-raw", "nc", "monthly_disturbance.nc")
-
-
-
-rst <- list(
-    "sed" = {ncdf_stack(sed_path)},
-    "dis" = {ncdf_dimstack(dis_path, dimension = "Time") %>% 
-            setNames(month.name[names(.) %>% 
-                                    stringr::str_replace("month_", "") %>% 
-                                    as.numeric()])})
-
-varnames <- list(sed = names(rst[["sed"]]),
-                 dis = names(rst[["dis"]]))
-rst <- raster::stack(rst)
+# ---- load_data ----
+rst <- readRDS(here::here("data", "raster", "sed_maps.rds"))
 
 sf_files <- list.files(here::here("data", "sf"), full.names = T)
-system.file("data", sf_files[1], package = "sedMaps")
+#system.file("data", sf_files[1], package = "sedMaps")
 sf <- readRDS(sf_files[1])
 
 # Define UI for application that draws a histogram
@@ -114,13 +100,16 @@ server <- function(input, output) {
             }
     })
     
+    extract_data <- reactive({
+        
+    })
     
     output$leaflet <- renderLeaflet({
     
         raster_map() %>%
             lflt_sf(sf, 
                     fillColor = "white", weight = 1.2, fillOpacity = 0.3, 
-                    label = glue::glue("{sf$LABEL}: {sf$INFO}"), 
+                    label = glue::glue("{sf$id}: {sf$descr}"), 
                     group = "click.list") %>%
             #leaflet.extras::addDrawToolbar() %>%
             identity()
@@ -136,9 +125,11 @@ server <- function(input, output) {
         
         lflt_sf_selected(sf, ids = click.list$ids, 
                          fillColor = "white", 
-                         label = glue::glue("{sf$LABEL}: {sf$INFO} +"), 
-                         weight = 2.5, fillOpacity = 0.8,
-                         group = "click.list")
+                         label = glue::glue("{sf$id}: {sf$descr} +")
+                         #, 
+                         #weight = 2.5, fillOpacity = 0.8,
+                         #group = "click.list"
+                         )
         
   
         #} # end of if else statement
@@ -152,7 +143,7 @@ server <- function(input, output) {
             raster_map()  %>%
                 lflt_sf(sf, fillColor = "white", 
                         weight = 1.2,
-                        label = glue::glue("{sf$LABEL}: {sf$INFO}"), 
+                        label = glue::glue("{sf$id}: {sf$descr}"), 
                         group = "click.list", fillOpacity = 0.3) 
             
         }) # end of re-rendering $leaflet
