@@ -3,3 +3,5 @@
 .Rproj.user
 data-raw/*
 *.DS_Store*
+*dev*
+data/*
