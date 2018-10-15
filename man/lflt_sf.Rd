@@ -4,7 +4,7 @@
 \alias{lflt_sf}
 \title{Add sf vector selection layer}
 \usage{
-lflt_sf(map, sf = NULL, pal_f = topo.colors(10), ...)
+lflt_sf(map, sf = NULL, ids = NULL, pal_f = topo.colors(10), ...)
 }
 \arguments{
 \item{map}{leaflet map object}

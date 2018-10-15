@@ -4,11 +4,9 @@
 \alias{lflt_contour}
 \title{add contour map derived from raster}
 \usage{
-lflt_contour(map, r, color = "white", weight = 0.5)
+lflt_contour(r, color = "white", weight = 0.5)
 }
 \arguments{
-\item{map}{a leaflet map widget}
-
 \item{r}{a raster to contour}
 
 \item{color}{colour for the contour lines}

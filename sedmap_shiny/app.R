@@ -16,22 +16,25 @@ library(htmltools)
 
 # ---- load_data ----
 rst <- readRDS(here::here("data", "raster", "sed_maps.rds"))
+varnames <- readRDS(here::here("data", "raster", "varnames.rds"))
 
 sf_files <- list.files(here::here("data", "sf"), full.names = T)
 #system.file("data", sf_files[1], package = "sedMaps")
 sf <- readRDS(sf_files[1])
 
-# Define UI for application that draws a histogram
+mode <- "view"
+
+# ---- Define-UI ----
 ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
                 
-                # Application title
+                # ---- Application-title ----
                 titlePanel("Sedimentary Environment Data Explorer"),
                 
                 
-                # Leaflet plot 
+                # ---- Leaflet-plot ----
                 leafletOutput("leaflet", width = "100%",  height="1000px"),
                 
-                # layer selection panel
+                # ---- layer-selection-panel ----
                 absolutePanel(
                     top = 70, left = 20, width = 270,
                     draggable = TRUE,
@@ -48,7 +51,7 @@ ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
                                              radioButtons("varname_dis", label = h5("Select layer"),
                                                           choices = varnames[["dis"]]), 
                                              selected = varnames[["dis"]][1])))),
-                # Map tools
+                # ---- Map-tools ----
                 absolutePanel(
                     bottom = 20, right = 20, width = 200,
                     draggable = TRUE,
@@ -80,17 +83,29 @@ ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
 
 
 
-# Define server logic required to draw a histogram
+# ---- Define-server-logic ---- 
 server <- function(input, output) {
     #v <- reactiveValues(varname = input$varname_sed)
+    # ---- define-raster-reactives ----
     get_varname <- reactive({switch(input$data,
                                     "sed" = input$varname_sed,
                                     "dis" = input$varname_dis)})
-    raster_map <- shiny::reactive({
-        lflt_plot(rst, varname = get_varname(), label = "Disturbance", 
-                  opacity = input$opacity, option = input$option,
-                  basemap = input$basemap)})
+    get_label <- reactive({switch(input$data,
+                                    "sed" = input$varname_sed,
+                                    "dis" = "disturbance")})
+    # ---- basemap ----
+    base_map <- shiny::reactive({
+        lflt_basemap(rst, basemap = input$basemap)})
     
+    # ---- raster-layer ----
+    raster_layer <- shiny::reactive({
+        lflt_rst_selected(rst, 
+                          varname = get_varname(), 
+                          label = get_label(), 
+                          opacity = input$opacity, 
+                          option = input$option)})
+    
+    # ---- define-selection-reactives ----
     get_selected <- shiny::reactive({
         click <- input$leaflet_shape_click
         if(click$id %in% click.list$ids){
@@ -100,15 +115,16 @@ server <- function(input, output) {
             }
     })
     
+    
+    # ---- extract-data
     extract_data <- reactive({
         
     })
     
     output$leaflet <- renderLeaflet({
-    
-        raster_map() %>%
+        map <- base_map()
+        map %>%
             lflt_sf(sf, 
-                    fillColor = "white", weight = 1.2, fillOpacity = 0.3, 
                     label = glue::glue("{sf$id}: {sf$descr}"), 
                     group = "click.list") %>%
             #leaflet.extras::addDrawToolbar() %>%
@@ -116,10 +132,16 @@ server <- function(input, output) {
         
     })
     
+    # ---- render-rasterLayer ----
+        shiny::observeEvent({
+            input$varname_sed
+            input$varname_dis}, {
+            raster_layer()
+        })
+    
     click.list <- shiny::reactiveValues(ids = vector())
     
     shiny::observeEvent(input$leaflet_shape_click, {
-        
        click.list$ids <- get_selected()
         print(click.list$ids)
         
@@ -141,8 +163,7 @@ server <- function(input, output) {
         output$leaflet <- leaflet::renderLeaflet({
             click.list$ids <- NULL
             raster_map()  %>%
-                lflt_sf(sf, fillColor = "white", 
-                        weight = 1.2,
+                lflt_sf(sf, 
                         label = glue::glue("{sf$id}: {sf$descr}"), 
                         group = "click.list", fillOpacity = 0.3) 
             
