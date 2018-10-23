@@ -13,7 +13,7 @@ lflt_basemap <- function(rst, basemap = "Esri.OceanBasemap"){
     leaflet() %>% 
         addTiles()  %>% 
         fitBounds(xt@xmin , xt@ymin , xt@xmax , xt@ymax) %>%
-        addProviderTiles(providers[[basemap]]) 
+        addProviderTiles(providers[[basemap]])
 }
 
 
@@ -54,18 +54,22 @@ lflt_rst_selected <- function(rst, varname = NULL,
     if(is.null(label)) label <- varname
     
     leaflet::leafletProxy(mapId = "leaflet") %>%
-        leaflet::clearShapes() %>%
-        leaflet::clearImages()  %>%
-        leaflet::clearControls() %>%
+        #leaflet::clearGroup(group = "raster") %>%
         leaflet::addRasterImage(r, colors = pal, 
-                                opacity = opacity) %>%
+                                opacity = opacity,
+                                layerId = "rst",
+                                group = "raster") %>%
         leaflet::addPolylines(color = "white", 
                               data = contour,
-                              weight = 0.5) %>%
+                              weight = 0.5,
+                              layerId = "contour",
+                              group = "raster") %>%
         leaflet::addLegend(pal = pal, 
                   values = raster::values(r),
                   label = label,
-                  title = label) 
+                  title = label,
+                  layerId = "legend",
+                  group = "raster") 
     
 }
 #' Add sf vector selection layer
@@ -113,6 +117,7 @@ lflt_sf_selected <- function(sf, ids, pal_f =  topo.colors(10), ...){
     leaflet::leafletProxy(mapId = "leaflet") %>%
         leaflet::addPolygons( data = selected,
                               layerId = ~id,
+                              group = "sf",
                               opacity = ~opacity, 
                               color = ~color,
                               fillOpacity = ~fillOpacity,
@@ -143,7 +148,7 @@ lflt_factpal <- function(sf, pal_f = topo.colors(10)){
 prep_sf <- function(sf, ids = NULL, pal_f =  topo.colors(10)){
     factpal <- lflt_factpal(sf, pal_f)
     sf %>% sf::st_transform(sf, crs = 4326) %>% 
-        mutate(select = if(is.null(ids)){TRUE}else{id %in% ids},
+        mutate(select = if(is.null(ids)){FALSE}else{id %in% ids},
                fillOpacity = case_when(
                    select == TRUE ~ 0.5,
                    select == FALSE ~ 0.3),
