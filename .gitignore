@@ -5,3 +5,4 @@ data-raw/*
 *.DS_Store*
 *dev*
 data/*
+!data/metadata

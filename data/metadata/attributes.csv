@@ -1,0 +1,36 @@
+fileName,variableName,description,unitText
+sed_maps.rds,MudPercent,Mud percentage,%
+sed_maps.rds,SandPercent,Sand percentage,%
+sed_maps.rds,GravelPercent,Gravel percentage,%
+sed_maps.rds,TotalD50,Median grain size of the whole sediment,mm
+sed_maps.rds,SandD50,Median grain size of the sand fraction,mm
+sed_maps.rds,GravelD50,Median grain size of the gravel fraction,mm
+sed_maps.rds,Rock10cm,Fraction of area with rock in the top 10 cm of sediment,Fraction
+sed_maps.rds,Rock50cm,Fraction of area with rock in the top 50 cm of sediment,Fraction
+sed_maps.rds,Porosity,Porosity of the sediment,unitless
+sed_maps.rds,Permeability,Permeability of the sediment,m^2
+sed_maps.rds,POC,Particulate organic carbon content of sediments,%
+sed_maps.rds,TN,Nitrogen content of sediments,%
+sed_maps.rds,SurfaceCarbon,Carbon stored in surface sediments,kg C m^-2
+sed_maps.rds,SurfaceNitrogen,Nitrogen stored in surface sediments,kg N m^-2
+sed_maps.rds,OrbitalVelMean,Mean orbital velocity at the seabed,ms^-1
+sed_maps.rds,OrbitalVelMax,Maximum Orbital velocity at the seabed,ms^-1
+sed_maps.rds,TidalVelMean,Mean depth-average tidal velocity,ms^-1
+sed_maps.rds,TidalVelMax,Maximum depth-average tidal velocity,ms^-1
+sed_maps.rds,January,Mean monthly natural disturbance rates in January,area_fraction d^-1
+sed_maps.rds,February,Mean monthly natural disturbance rates in February,area_fraction d^-1
+sed_maps.rds,March,Mean monthly natural disturbance rates in March,area_fraction d^-1
+sed_maps.rds,April,Mean monthly natural disturbance rates in April,area_fraction d^-1
+sed_maps.rds,May,Mean monthly natural disturbance rates in May,area_fraction d^-1
+sed_maps.rds,June,Mean monthly natural disturbance rates in June,area_fraction d^-1
+sed_maps.rds,July,Mean monthly natural disturbance rates in July,area_fraction d^-1
+sed_maps.rds,August,Mean monthly natural disturbance rates in August,area_fraction d^-1
+sed_maps.rds,September,Mean monthly natural disturbance rates in September,area_fraction d^-1
+sed_maps.rds,October,Mean monthly natural disturbance rates in October,area_fraction d^-1
+sed_maps.rds,November,Mean monthly natural disturbance rates in November,area_fraction d^-1
+sed_maps.rds,December,Mean monthly natural disturbance rates in December,area_fraction d^-1
+mmo_marine_plan_areas.rds,source,simple feature geometry source,NA
+mmo_marine_plan_areas.rds,id,simple feature geometry identifier,NA
+mmo_marine_plan_areas.rds,descr,simple feature geometry description,NA
+mmo_marine_plan_areas.rds,area,simple feature geometry area,km^2
+mmo_marine_plan_areas.rds,geometry,simple feature geometry,NA
