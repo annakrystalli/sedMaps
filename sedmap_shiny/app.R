@@ -13,6 +13,7 @@ library(dplyr)
 library(leaflet)
 library(htmlwidgets)
 library(htmltools)
+library(leaflet.extras)
 
 # ---- load_data ----
 rst <- readRDS(here::here("data", "raster", "sed_maps.rds"))
@@ -20,7 +21,7 @@ varnames <- readRDS(here::here("data", "raster", "varnames.rds"))
 
 sf_files <- list.files(here::here("data", "sf"), full.names = T)
 #system.file("data", sf_files[1], package = "sedMaps")
-sf <- readRDS(sf_files[1])
+#sf <- readRDS(sf_files[1])
 
 mode <- "view"
 
@@ -28,7 +29,10 @@ mode <- "view"
 ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
                 
                 # ---- Application-title ----
-                titlePanel("Sedimentary Environment Data Explorer"),
+                navbarPage("Sedimentary Environment Data Explorer",
+                           id = "mode", selected = "view",
+                           tabPanel("view"),
+                           tabPanel("extract")),
                 
                 
                 # ---- Leaflet-plot ----
@@ -42,21 +46,25 @@ ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
                         h3("Layers"),
                         tabsetPanel(id = "data", type = "tabs", selected = "sed",
                                     tabPanel("Sediment", value = "sed",
-                                             hr(),
-                                             radioButtons("varname_sed", label = h4("Select layer"),
-                                                          choices =  varnames[["sed"]], 
-                                                          selected =  varnames[["sed"]][1])),
+                                             hr(), 
+                                             uiOutput("sed_panel")
+                                    ),
                                     tabPanel("Disturbance",  value = "dis",
                                              hr(),
-                                             radioButtons("varname_dis", label = h5("Select layer"),
-                                                          choices = varnames[["dis"]]), 
-                                             selected = varnames[["dis"]][1])))),
+                                             uiOutput("dis_panel"))
+                        )
+                    )
+                ),
+                
                 # ---- Map-tools ----
                 absolutePanel(
-                    bottom = 20, right = 20, width = 200,
+                    bottom = 20, right = 20, width = 300,
                     draggable = TRUE,
                     wellPanel(opacity = 0.8,
-                              h3("Map tools"),
+                              uiOutput("extract_mode"),
+                              uiOutput("select_sf"),
+                              uiOutput("select_box"),
+                              h4("Map tools"),
                               hr(),
                               sliderInput("opacity",h5("Layer opacity"),
                                           min = 0,
@@ -68,15 +76,8 @@ ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
                                           selected = "A"),
                               selectInput("basemap", label = h5("Basemap"), 
                                           choices = leaflet::providers, 
-                                          selected = "Esri.OceanBasemap"),
-                              shinydashboard::box(
-                                  width = 12,
-                                  shiny::actionButton( inputId = "clearHighlight",
-                                                             icon = icon( name = "eraser"),
-                                                             label = "Clear the Map",
-                                                             style = "color: #fff; background-color: #D75453; border-color: #C73232"
-                                      ))
-                                  
+                                          selected = "Esri.OceanBasemap")
+                              
                     )
                 )
 )
@@ -85,91 +86,190 @@ ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
 
 # ---- Define-server-logic ---- 
 server <- function(input, output) {
-    #v <- reactiveValues(varname = input$varname_sed)
+    v <- reactiveValues(selected_varnames = NULL,
+                        varname = NULL,
+                        sf = NULL)
+    click.list <- shiny::reactiveValues(ids = vector())
+    draw.list <- shiny::reactiveValues()
+    
     # ---- define-raster-reactives ----
     get_varname <- reactive({switch(input$data,
                                     "sed" = input$varname_sed,
                                     "dis" = input$varname_dis)})
     get_label <- reactive({switch(input$data,
-                                    "sed" = input$varname_sed,
-                                    "dis" = "disturbance")})
+                                  "sed" = input$varname_sed[length(input$varname_sed)],
+                                  "dis" = input$varname_dis[length(input$varname_dis)])})
+    
+    get_last_varname <- reactive({
+        v$selected_varnames <- update_selected_varnames(
+            selected = v$selected_varnames,
+            get_varname())
+        v$selected_varnames[length(v$selected_varnames)]
+    })
+    
     # ---- basemap ----
     base_map <- shiny::reactive({
-        lflt_basemap(rst, basemap = input$basemap)})
+        lflt_basemap(rst, basemap = input$basemap) %>% 
+            addFullscreenControl()
+    })
+    
+    # ---- sf ----
+    load_sf <- reactive({
+        req(input$select_sf)
+        readRDS(here::here("data", 
+                           "sf",
+                           input$select_sf))
+    })
+    
+    
+    sf_layer <- reactive({
+        req(v$sf)
+        lflt_sf_selected(sf = v$sf, ids = click.list$ids, 
+                         fillColor = "white", 
+                         label = glue::glue("{v$sf$id}: {v$sf$descr} +"))
+    })
+    
     
     # ---- raster-layer ----
     raster_layer <- shiny::reactive({
+        req(input$opacity)
+        # get varname
+        v$varname <- switch(input$mode,
+                            "view" =  get_varname(),
+                            "extract" = get_last_varname())
+        # plot raster layer
         lflt_rst_selected(rst, 
-                          varname = get_varname(), 
-                          label = get_label(), 
+                          varname = v$varname, 
+                          label = v$varname, 
                           opacity = input$opacity, 
-                          option = input$option)})
+                          option = input$option)
+    })
     
     # ---- define-selection-reactives ----
     get_selected <- shiny::reactive({
         click <- input$leaflet_shape_click
         if(click$id %in% click.list$ids){
             click.list$ids[click.list$ids != click$id]
-            }else{
-                c(click.list$ids, click$id)
-            }
+        }else{
+            c(click.list$ids, click$id)
+        }
     })
     
+    get_drawn <- shiny::reactive({
+        feature <- input$leaflet_draw_feature
+        if(click$id %in% click.list$ids){
+            click.list$ids[click.list$ids != click$id]
+        }else{
+            c(click.list$ids, click$id)
+        }
+    })
     
+    render_sed <- reactive({ panel_layers(panel = "sed", 
+                                          mode = input$mode, 
+                                          varnames = varnames)})
+    render_dis <- reactive({ panel_layers(panel = "dis", 
+                                          mode = input$mode, 
+                                          varnames = varnames)})
+    render_extract_mode <- reactive({
+        panel_extract_mode()
+    })
+    render_select_sf <- reactive({
+        req(input$extract_mode)
+        panel_select_sf(input$extract_mode)
+    })
     # ---- extract-data
     extract_data <- reactive({
         
     })
     
+    # ---- layer-UI ----
+    output$sed_panel <- renderUI({render_sed()})
+    output$dis_panel <- renderUI({render_dis()})
+    
+    # ---- basemap ----
     output$leaflet <- renderLeaflet({
         map <- base_map()
-        map %>%
-            lflt_sf(sf, 
-                    label = glue::glue("{sf$id}: {sf$descr}"), 
-                    group = "click.list") %>%
-            #leaflet.extras::addDrawToolbar() %>%
-            identity()
-        
     })
     
+    # ---- observeEvents ----        
     # ---- render-rasterLayer ----
-        shiny::observeEvent({
-            input$varname_sed
-            input$varname_dis}, {
+    shiny::observeEvent({
+        input$varname_sed
+        input$varname_dis
+        input$option
+        input$opacity}, {
+            req(input$opacity)
             raster_layer()
+            sf_layer()
         })
     
-    click.list <- shiny::reactiveValues(ids = vector())
-    
     shiny::observeEvent(input$leaflet_shape_click, {
-       click.list$ids <- get_selected()
         print(click.list$ids)
-        
-        lflt_sf_selected(sf, ids = click.list$ids, 
-                         fillColor = "white", 
-                         label = glue::glue("{sf$id}: {sf$descr} +")
-                         #, 
-                         #weight = 2.5, fillOpacity = 0.8,
-                         #group = "click.list"
-                         )
-        
-  
-        #} # end of if else statement
-        
-    }) # end of shiny::observeEvent({})
+        click.list$ids <- get_selected()
+        print(click.list$ids)
+        sf_layer()
+    })
     
-    shiny::observeEvent(input$clearHighlight, {
-        
-        output$leaflet <- leaflet::renderLeaflet({
-            click.list$ids <- NULL
-            raster_map()  %>%
-                lflt_sf(sf, 
-                        label = glue::glue("{sf$id}: {sf$descr}"), 
-                        group = "click.list", fillOpacity = 0.3) 
-            
-        }) # end of re-rendering $leaflet
-        
-    }) # end of clearHighlight action button logic
+    shiny::observeEvent(input$extract_deselect, {
+        click.list$ids <- NULL
+        sf_layer()
+    }) # end of deselect action button logic
+    shiny::observeEvent(input$extract_select, {
+        click.list$ids <- v$sf$id
+        sf_layer()
+    })
+    
+    
+    
+    shiny::observeEvent(input$mode, {
+        v$selected_varnames <- NULL
+        if(input$mode == "extract"){
+            output$extract_mode <- renderUI({render_extract_mode()})
+            output$select_sf <- renderUI({render_select_sf()})
+            output$select_box <- renderUI({select_box(panel = "extract")})
+        }
+        if(input$mode == "view"){
+            output$extract_mode <- NULL
+            output$select_sf <- NULL
+            v$sf <- NULL
+        }
+    })
+    shiny::observeEvent(input$load_sf,{
+        v$sf <- load_sf()
+        click.list$ids <- NULL
+        sf_layer()
+    })
+    
+    shiny::observeEvent(input$extract_mode,{
+        if(input$extract_mode == "draw"){
+            leaflet::leafletProxy("leaflet") %>% 
+                addDrawToolbar(
+                    targetGroup = 'draw',
+                    position = "topright",
+                    circleOptions = F,
+                    circleMarkerOptions = F,
+                    editOptions = editToolbarOptions(
+                        selectedPathOptions = 
+                            selectedPathOptions())) #%>%
+                #addLayersControl(overlayGroups = 'draw', options =
+                                     #layersControlOptions(collapsed=FALSE))
+        }else{
+            leaflet::leafletProxy("leaflet") %>%
+                removeDrawToolbar(clearFeatures = T) %>%
+                clearGroup("draw")
+        }
+    })
+    
+    observeEvent({
+        #input$leaflet_draw_new_feature
+                 #input$leaflet_draw_deleted_features
+                 input$leaflet_draw_all_features
+                 #input$leaflet_draw_deletestop
+                 }, {
+        #dput(input$leaflet_draw_new_feature)
+        print(drawFeature2sf(input$leaflet_draw_new_feature))
+        print(str(input$leaflet_draw_all_features))
+    })
 }
 
 # Run the application 
