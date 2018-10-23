@@ -91,3 +91,35 @@ extr_raster <- function(rst, sf){
         raster::mask(rst, sf))
 }
 
+#' Title
+#'
+#' @param feature 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+drawFeature2sf <- function(feature){
+    type <- feature$geometry$type
+    id <- feature[["properties"]][["_leaflet_id"]]
+    
+    wkt <- switch (type,
+                   "Polygon" = sf::st_polygon(
+                       list(matrix(unlist(
+                           feature$geometry$coordinates[[1]]),
+                           ncol=2,
+                           byrow=TRUE))),
+                   "LineString" = sf::st_linestring(
+                       matrix(unlist(
+                           feature$geometry$coordinates),
+                           ncol=2,
+                           byrow=TRUE)),
+                   "Point" = sf::st_point(unlist(
+                           feature$geometry$coordinates)))
+    
+    sf::st_sf(id = feature[["properties"]][["_leaflet_id"]],
+              descr = glue::glue(
+                  'drawn {type} {id}'),
+              geometry = sf::st_sfc(wkt, crs = 4326)) %>% 
+        mutate(area = sf::st_area(.))
+}
