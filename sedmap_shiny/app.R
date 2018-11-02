@@ -10,13 +10,15 @@
 library(shiny)
 library(sedMaps)
 library(dplyr)
+library(raster)
 library(leaflet)
 library(htmlwidgets)
 library(htmltools)
 library(leaflet.extras)
+library(readr)
 
 # ---- load_data ----
-rst <- readRDS("data/raster/sed_maps.rds")
+rst <- raster::raster("data/raster/sed_maps.rds")
 varnames <- readRDS("data/raster/varnames.rds")
 load_spice("data/metadata")
 
@@ -120,7 +122,7 @@ server <- function(input, output) {
     # ---- sf ----
     load_sf <- reactive({
         req(input$select_sf)
-        readRDS(file.path("data/sf", input$select_sf))
+        readRDS(paste0("data/sf", input$select_sf))
     })
     
     
