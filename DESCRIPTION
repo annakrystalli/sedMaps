@@ -20,7 +20,9 @@ Imports:
     glue,
     leaflet.extras,
     readr,
-    rgdal
+    rgdal,
+    shinydashboard,
+    shinyWidgets
 RoxygenNote: 6.1.0
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/annakrystalli/sedMaps
