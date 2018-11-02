@@ -18,7 +18,7 @@ library(leaflet.extras)
 library(readr)
 
 # ---- load_data ----
-rst <- raster::raster("data/raster/sed_maps.rds")
+rst <- raster::raster("data/raster/sed_maps.grd")
 varnames <- readRDS("data/raster/varnames.rds")
 load_spice("data/metadata")
 
