@@ -16,11 +16,11 @@ library(htmltools)
 library(leaflet.extras)
 
 # ---- load_data ----
-rst <- readRDS(here::here("data", "raster", "sed_maps.rds"))
-varnames <- readRDS(here::here("data", "raster", "varnames.rds"))
-load_spice()
+rst <- readRDS("data/raster/sed_maps.rds")
+varnames <- readRDS("data/raster/varnames.rds")
+load_spice("data/metadata")
 
-sf_files <- list.files(here::here("data", "sf"), full.names = T)
+sf_files <- list.files("data/sf", full.names = T)
 
 
 
@@ -120,9 +120,7 @@ server <- function(input, output) {
     # ---- sf ----
     load_sf <- reactive({
         req(input$select_sf)
-        readRDS(here::here("data", 
-                           "sf",
-                           input$select_sf))
+        readRDS(file.path("data/sf", input$select_sf))
     })
     
     

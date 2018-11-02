@@ -4,5 +4,5 @@
 data-raw/*
 *.DS_Store*
 *dev*
-data/*
-!data/metadata
+sedmap_shiny/data/*
+!sedmap_shiny/data/metadata
