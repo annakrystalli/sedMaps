@@ -53,7 +53,7 @@ panel_select_sf <- function(extract_mode){
            "draw" = {},
            "sf" = {
                shiny::wellPanel(selectInput("select_sf", "select simple features dataset",
-                                            choices = list.files(here::here("data", "sf")),
+                                            choices = list.files("data/sf"),
                                             selected = NULL),
                                 actionButton("load_sf", label = "load sf",
                                              icon = icon("layer-group",
