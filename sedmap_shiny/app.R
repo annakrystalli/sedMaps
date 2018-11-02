@@ -18,8 +18,12 @@ library(leaflet.extras)
 # ---- load_data ----
 rst <- readRDS(here::here("data", "raster", "sed_maps.rds"))
 varnames <- readRDS(here::here("data", "raster", "varnames.rds"))
+load_spice()
 
 sf_files <- list.files(here::here("data", "sf"), full.names = T)
+
+
+
 #system.file("data", sf_files[1], package = "sedMaps")
 #sf <- readRDS(sf_files[1])
 
