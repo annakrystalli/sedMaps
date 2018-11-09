@@ -11,14 +11,18 @@ library(shiny)
 library(sedMaps)
 library(dplyr)
 library(raster)
+library(rgdal)
 library(leaflet)
 library(htmlwidgets)
 library(htmltools)
 library(leaflet.extras)
 library(readr)
 
+options(shiny.trace=TRUE)
+#options(shiny.fullstacktrace=TRUE)
+
 # ---- load_data ----
-rst <- raster::raster("data/raster/sed_maps.grd")
+rst <- raster::stack("data/raster/sed_maps.grd")
 varnames <- readRDS("data/raster/varnames.rds")
 load_spice("data/metadata")
 
@@ -95,7 +99,8 @@ server <- function(input, output) {
     v <- reactiveValues(selected_varnames = NULL,
                         varname = NULL,
                         sf = NULL)
-    click.list <- shiny::reactiveValues(ids = vector())
+    click.list <- shiny::reactiveValues(ids = vector(),
+                                        id = vector())
     draw.list <- shiny::reactiveValues()
     
     # ---- define-raster-reactives ----
@@ -122,15 +127,33 @@ server <- function(input, output) {
     # ---- sf ----
     load_sf <- reactive({
         req(input$select_sf)
-        readRDS(paste0("data/sf", input$select_sf))
+        leaflet::clearGroup(leaflet::leafletProxy(mapId = "leaflet"),
+                            "sf") 
+        
+        readRDS(paste0("data/sf/", input$select_sf))
     })
     
-    
-    sf_layer <- reactive({
+    # add clicked sf layer to draw
+    sf_add_layer <- reactive({
         req(v$sf)
-        lflt_sf_selected(sf = v$sf, ids = click.list$ids, 
-                         fillColor = "white", 
+        lflt_sf_selected(sf = v$sf, 
+                         ids = input$leaflet_shape_click$id, 
                          label = glue::glue("{v$sf$id}: {v$sf$descr} +"))
+    })
+    
+    # add all sf layers to draw
+    sf_add_all_layers <- reactive({
+        req(v$sf)
+        lflt_sf_selected(sf = v$sf, ids = "all", 
+                         label = glue::glue("{v$sf$id}: {v$sf$descr} +"))
+    })
+    
+    sf_base_layer <- reactive({
+        req(v$sf)
+        leaflet::leafletProxy(mapId = "leaflet") %>%
+        leaflet::clearGroup("sf") 
+        
+        lflt_sf(sf = v$sf, label = glue::glue("{v$sf$id}: {v$sf$descr} +"))
     })
     
     
@@ -150,15 +173,6 @@ server <- function(input, output) {
     })
     
     # ---- define-selection-reactives ----
-    get_selected <- shiny::reactive({
-        click <- input$leaflet_shape_click
-        if(click$id %in% click.list$ids){
-            click.list$ids[click.list$ids != click$id]
-        }else{
-            c(click.list$ids, click$id)
-        }
-    })
-    
     get_drawn <- shiny::reactive({
         feature <- input$leaflet_draw_feature
         if(click$id %in% click.list$ids){
@@ -168,6 +182,7 @@ server <- function(input, output) {
         }
     })
     
+    # panel rendering reactives ----
     render_sed <- reactive({ panel_layers(panel = "sed", 
                                           mode = input$mode, 
                                           varnames = varnames)})
@@ -181,7 +196,7 @@ server <- function(input, output) {
         req(input$extract_mode)
         panel_select_sf(input$extract_mode)
     })
-    # ---- extract-data
+    # ---- extract-data ----
     extract_data <- reactive({
         
     })
@@ -204,26 +219,30 @@ server <- function(input, output) {
         input$opacity}, {
             req(input$opacity)
             raster_layer()
-            sf_layer()
         })
     
+    
+    shiny::observeEvent(input$load_sf,{
+        v$sf <- load_sf()
+        click.list$ids <- NULL
+        sf_base_layer()
+    })
+    
     shiny::observeEvent(input$leaflet_shape_click, {
-        print(click.list$ids)
-        click.list$ids <- get_selected()
-        print(click.list$ids)
-        sf_layer()
+        #print(click$id)
+        #sf_add_layer()
     })
     
     shiny::observeEvent(input$extract_deselect, {
         click.list$ids <- NULL
-        sf_layer()
+        #sf_layer()
     }) # end of deselect action button logic
     shiny::observeEvent(input$extract_select, {
         click.list$ids <- v$sf$id
-        sf_layer()
+        #sf_layer()
     })
     
-    
+
     
     shiny::observeEvent(input$mode, {
         v$selected_varnames <- NULL
@@ -238,13 +257,10 @@ server <- function(input, output) {
             v$sf <- NULL
         }
     })
-    shiny::observeEvent(input$load_sf,{
-        v$sf <- load_sf()
-        click.list$ids <- NULL
-        sf_layer()
-    })
+
     
     shiny::observeEvent(input$extract_mode,{
+        
         if(input$extract_mode == "draw"){
             leaflet::leafletProxy("leaflet") %>% 
                 addDrawToolbar(
@@ -254,9 +270,9 @@ server <- function(input, output) {
                     circleMarkerOptions = F,
                     editOptions = editToolbarOptions(
                         selectedPathOptions = 
-                            selectedPathOptions())) #%>%
-                #addLayersControl(overlayGroups = 'draw', options =
-                                     #layersControlOptions(collapsed=FALSE))
+                            selectedPathOptions())) %>%
+                addLayersControl(overlayGroups = 'draw', options =
+                                     layersControlOptions(collapsed=FALSE))
         }else{
             leaflet::leafletProxy("leaflet") %>%
                 removeDrawToolbar(clearFeatures = T) %>%
@@ -271,11 +287,13 @@ server <- function(input, output) {
                  #input$leaflet_draw_deletestop
                  }, {
         #dput(input$leaflet_draw_new_feature)
-        print(drawFeature2sf(input$leaflet_draw_new_feature))
-        print(str(input$leaflet_draw_all_features))
+        #print(drawFeature2sf(input$leaflet_draw_new_feature),)
+                     print(input$leaflet_sf)
+        print(input$leaflet_groups, 2)
     })
 }
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+         
 

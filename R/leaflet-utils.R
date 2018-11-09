@@ -34,8 +34,8 @@ lflt_basemap <- function(rst, basemap = "Esri.OceanBasemap"){
 #'
 #' @examples
 lflt_rst_selected <- function(rst, varname = NULL,
-                                option = "A", label = NULL,
-                                opacity = 0.8){
+                              option = "A", label = NULL,
+                              opacity = 0.8){
     
     if(is.null(varname)){ varname <- names(rst)[1]}else{
         varname <- match.arg(varname, choices = names(rst))}
@@ -65,11 +65,11 @@ lflt_rst_selected <- function(rst, varname = NULL,
                               layerId = "contour",
                               group = "raster") %>%
         leaflet::addLegend(pal = pal, 
-                  values = raster::values(r),
-                  label = label,
-                  title = label,
-                  layerId = "legend",
-                  group = "raster") 
+                           values = raster::values(r),
+                           label = label,
+                           title = label,
+                           layerId = "legend",
+                           group = "raster") 
     
 }
 #' Add sf vector selection layer
@@ -83,18 +83,20 @@ lflt_rst_selected <- function(rst, varname = NULL,
 #' @export
 #'
 #' @examples
-lflt_sf <- function(map, sf = NULL, ids = NULL, pal_f =  topo.colors(10), ...){
-    if(is.null(sf)){map}else{
-        sf <- prep_sf(sf, ids, pal_f)
-        map %>%
-            mapview::addFeatures(data = sf, 
-                                 layerId = ~id,
-                                 opacity = ~opacity, 
-                                 color = ~color,
-                                 fillOpacity = ~fillOpacity,
-                                 weight = ~weight, 
-                                 ...)
-    }
+lflt_sf <- function(map, sf, pal_f =  topo.colors(10), ...){
+    selected <- prep_sf(sf, ids = NULL, pal_f) 
+    
+    leaflet::leafletProxy(mapId = "leaflet") %>%
+        leaflet::addPolygons( data = selected,
+                              layerId = ~as.character(id),
+                              group = "sf",
+                              opacity = 0.6, 
+                              color = "white",
+                              fillOpacity = 0.2,
+                              weight = 2, 
+                              ...) %>%
+        leaflet::addLayersControl(overlayGroups = c('draw', "sf", sf$id), options =
+                             layersControlOptions(collapsed=TRUE))
 }
 
 
@@ -111,17 +113,18 @@ lflt_sf <- function(map, sf = NULL, ids = NULL, pal_f =  topo.colors(10), ...){
 #'
 #' @examples
 lflt_sf_selected <- function(sf, ids, pal_f =  topo.colors(10), ...){
-
-    selected <- prep_sf(sf, ids, pal_f) 
+    
+    selected <- prep_sf(sf, ids, pal_f) %>%
+        dplyr::filter(select == TRUE)
     
     leaflet::leafletProxy(mapId = "leaflet") %>%
         leaflet::addPolygons( data = selected,
                               layerId = ~id,
-                              group = "sf",
-                              opacity = ~opacity, 
-                              color = ~color,
-                              fillOpacity = ~fillOpacity,
-                              weight = ~weight, 
+                              group = "draw",
+                              opacity = 1, 
+                              color = "blue",
+                              fillOpacity = 0.85,
+                              weight = 4, 
                               ...)
 }
 
@@ -137,7 +140,7 @@ lflt_sf_selected <- function(sf, ids, pal_f =  topo.colors(10), ...){
 #'
 #' @examples
 lflt_contour <- function(r, color = "white", weight = 0.5){
-
+    
 }
 
 
@@ -146,17 +149,31 @@ lflt_factpal <- function(sf, pal_f = topo.colors(10)){
 }
 
 prep_sf <- function(sf, ids = NULL, pal_f =  topo.colors(10)){
+    
     factpal <- lflt_factpal(sf, pal_f)
     sf %>% sf::st_transform(sf, crs = 4326) %>% 
-        mutate(select = if(is.null(ids)){FALSE}else{id %in% ids},
-               fillOpacity = case_when(
-                   select == TRUE ~ 0.5,
-                   select == FALSE ~ 0.3),
-               color = factpal(as.factor(id)),
-               weight = case_when(
-                   select == TRUE ~ 2.8,
-                   select == FALSE ~ 1.3),
-               opacity = case_when(
-                   select == TRUE ~ 1,
-                   select == FALSE ~ 0.85))
+        dplyr::mutate(select = if(is.null(ids)){
+            FALSE}else{
+                if(ids[1] == "all"){ids <- sf$id}
+                id %in% ids},
+            fillOpacity = dplyr::case_when(
+                select == TRUE ~ 0.75,
+                select == FALSE ~ 0.3),
+            color = "white",
+            weight = dplyr::case_when(
+                select == TRUE ~ 2.8,
+                select == FALSE ~ 1.3),
+            opacity = dplyr::case_when(
+                select == TRUE ~ 1,
+                select == FALSE ~ 0.5))
+}
+
+
+update_click_selection <- function(click.list, click){
+    click.list$id <- click$id
+    if(click$id %in% click.list$ids){
+        click.list$ids[click.list$ids != click$id]
+    }else{
+        c(click.list$ids, click$id)
+    }
 }
