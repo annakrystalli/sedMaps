@@ -3,7 +3,6 @@
 export("%>%")
 export(drawFeature2sf)
 export(lflt_basemap)
-export(lflt_contour)
 export(lflt_rst_selected)
 export(lflt_sf)
 export(lflt_sf_selected)
