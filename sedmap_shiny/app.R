@@ -34,12 +34,25 @@ sf_files <- list.files("data/sf", full.names = T)
 #sf <- readRDS(sf_files[1])
 
 mode <- "view"
-
+page_title <- "Sedimentary Environment Data Explorer"
 # ---- Define-UI ----
 ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
                 
+                includeCSS("www/styles.css"),
+                
                 # ---- Application-title ----
-                navbarPage("Sedimentary Environment Data Explorer",
+                navbarPage(windowTitle = page_title,
+                    position = "fixed-top",
+                           title =
+                               div(
+                                   div(
+                                       id = "logo-merp",
+                                       img(src = "merp-logo-long.png",
+                                           height = 50,
+                                           width = 250)
+                                   ),
+                                   page_title
+                               ),
                            id = "mode", selected = "view",
                            tabPanel("view"),
                            tabPanel("extract")),
@@ -70,11 +83,7 @@ ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
                 absolutePanel(
                     bottom = 20, right = 20, width = 300,
                     draggable = TRUE,
-                    wellPanel(opacity = 0.8,
-                              uiOutput("extract_mode"),
-                              uiOutput("select_sf"),
-                              uiOutput("select_box"),
-                              h4("Map tools"),
+                    wellPanel(h4("Map tools"),
                               hr(),
                               sliderInput("opacity",h5("Layer opacity"),
                                           min = 0,
@@ -89,7 +98,11 @@ ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
                                           selected = "Esri.OceanBasemap")
                               
                     )
-                )
+                ),
+                absolutePanel(
+                    top = 80, right = 10, width = 200,
+                    draggable = FALSE,
+                    uiOutput("select_sf"))
 )
 
 
@@ -193,8 +206,8 @@ server <- function(input, output) {
         panel_extract_mode()
     })
     render_select_sf <- reactive({
-        req(input$extract_mode)
-        panel_select_sf(input$extract_mode)
+        req(input$mode)
+        panel_select_sf()
     })
     # ---- extract-data ----
     extract_data <- reactive({
@@ -233,47 +246,29 @@ server <- function(input, output) {
         #sf_add_layer()
     })
     
-    shiny::observeEvent(input$extract_deselect, {
-        click.list$ids <- NULL
-        #sf_layer()
-    }) # end of deselect action button logic
-    shiny::observeEvent(input$extract_select, {
-        click.list$ids <- v$sf$id
-        #sf_layer()
-    })
-    
-
-    
     shiny::observeEvent(input$mode, {
         v$selected_varnames <- NULL
+        
         if(input$mode == "extract"){
-            output$extract_mode <- renderUI({render_extract_mode()})
+            
             output$select_sf <- renderUI({render_select_sf()})
-            output$select_box <- renderUI({select_box(panel = "extract")})
+     
+                leaflet::leafletProxy("leaflet") %>% 
+                    addDrawToolbar(
+                        targetGroup = 'draw',
+                        position = "topright",
+                        circleOptions = F,
+                        circleMarkerOptions = F,
+                        editOptions = editToolbarOptions(
+                            selectedPathOptions = 
+                                selectedPathOptions())) %>%
+                    addLayersControl(overlayGroups = 'draw', options =
+                                         layersControlOptions(collapsed=FALSE))
         }
         if(input$mode == "view"){
-            output$extract_mode <- NULL
             output$select_sf <- NULL
             v$sf <- NULL
-        }
-    })
-
-    
-    shiny::observeEvent(input$extract_mode,{
-        
-        if(input$extract_mode == "draw"){
-            leaflet::leafletProxy("leaflet") %>% 
-                addDrawToolbar(
-                    targetGroup = 'draw',
-                    position = "topright",
-                    circleOptions = F,
-                    circleMarkerOptions = F,
-                    editOptions = editToolbarOptions(
-                        selectedPathOptions = 
-                            selectedPathOptions())) %>%
-                addLayersControl(overlayGroups = 'draw', options =
-                                     layersControlOptions(collapsed=FALSE))
-        }else{
+            
             leaflet::leafletProxy("leaflet") %>%
                 removeDrawToolbar(clearFeatures = T) %>%
                 clearGroup("draw")
