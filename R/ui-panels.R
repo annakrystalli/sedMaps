@@ -23,9 +23,6 @@ panel_layers <- function(panel = c("sed", "dis"),
     )
 }
 
-
-
-
 #' Title
 #'
 #' @return
@@ -39,28 +36,23 @@ panel_extract_mode <- function(){
     # radioButtons()
 }
 
-#' Title
-#'
-#' @param extract_mode 
+#' Select sf wellpanel
 #'
 #' @return
 #' @export
 #'
 #' @examples
-panel_select_sf <- function(extract_mode){
-    
-    switch(extract_mode,
-           "draw" = {},
-           "sf" = {
-               shiny::wellPanel(selectInput("select_sf", "select simple features dataset",
-                                            choices = list.files("data/sf"),
-                                            selected = NULL),
-                                actionButton("load_sf", label = "load sf",
-                                             icon = icon("layer-group",
-                                                         lib = "font-awesome"),
-                                             width = "100%"), 
-                                style = "padding: 5px;")})
-    
+panel_select_sf <- function(){
+    shiny::wellPanel(
+        shiny::selectInput("select_sf", "Select Maritime Boundaries",
+                           choices = list.files("data/sf"),
+                           selected = NULL),
+        shiny::actionButton("load_sf", label = "Load",
+                            icon = shiny::icon("upload"),
+                            width = "100%"), 
+        style = "padding: 5px;"
+    )
+  #""  
     
 } 
 
