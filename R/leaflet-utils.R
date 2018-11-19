@@ -48,13 +48,13 @@ lflt_rst_selected <- function(rst, varname = NULL,
                                  raster::values(r),
                                  na.color = "transparent")
     # ---- get-contour ----
-    contour  <- raster::rasterToContour(r)
+    contour  <- raster::rasterToContour(r) 
     
     # ---- set-label -----
     if(is.null(label)) label <- varname
     
     leaflet::leafletProxy(mapId = "leaflet") %>%
-        #leaflet::clearGroup(group = "raster") %>%
+        leaflet::clearGroup(group = "raster") %>%
         leaflet::addRasterImage(r, colors = pal, 
                                 opacity = opacity,
                                 layerId = "rst",
@@ -62,7 +62,6 @@ lflt_rst_selected <- function(rst, varname = NULL,
         leaflet::addPolylines(color = "white", 
                               data = contour,
                               weight = 0.5,
-                              layerId = "contour",
                               group = "raster") %>%
         leaflet::addLegend(pal = pal, 
                            values = raster::values(r),
@@ -89,13 +88,13 @@ lflt_sf <- function(map, sf, pal_f =  topo.colors(10), ...){
     leaflet::leafletProxy(mapId = "leaflet") %>%
         leaflet::addPolygons( data = selected,
                               layerId = ~as.character(id),
-                              group = "sf",
+                              group = "loaded",
                               opacity = 0.6, 
                               color = "white",
                               fillOpacity = 0.2,
                               weight = 2, 
                               ...) %>%
-        leaflet::addLayersControl(overlayGroups = c('draw', "sf", sf$id), options =
+        leaflet::addLayersControl(overlayGroups = c('draw', "loaded"), options =
                              layersControlOptions(collapsed=TRUE))
 }
 
@@ -127,22 +126,6 @@ lflt_sf_selected <- function(sf, ids, pal_f =  topo.colors(10), ...){
                               weight = 4, 
                               ...)
 }
-
-
-#' add contour map derived from raster
-#'
-#' @param r a raster to contour
-#' @param color colour for the contour lines
-#' @param weight weight of contour lines.
-#'
-#' @return a leaflet map widgets with contours from raster image added.
-#' @export
-#'
-#' @examples
-lflt_contour <- function(r, color = "white", weight = 0.5){
-    
-}
-
 
 lflt_factpal <- function(sf, pal_f = topo.colors(10)){
     leaflet::colorFactor(pal_f, as.factor(sf$id))
