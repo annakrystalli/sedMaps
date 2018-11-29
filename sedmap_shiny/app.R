@@ -100,7 +100,7 @@ ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
                     )
                 ),
                 absolutePanel(
-                    top = 80, right = 10, width = 200,
+                    top = 80, right = 70, width = 170,
                     draggable = FALSE,
                     uiOutput("select_sf"))
 )
