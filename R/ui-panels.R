@@ -48,12 +48,13 @@ panel_select_sf <- function(){
         shiny::selectInput("select_sf", "Select Maritime Boundaries",
                            choices = choices,
                            selected = NULL),
-        shiny::helpText("Use in-built maritime boundary polygons to extract data"),
+        shiny::helpText("Use in-built maritime boundary polygons to extract data. Alternatively, 
+                        use side toolbar to draw custom extraction polygons"),
         shiny::actionButton("load_sf", label = "Load",
                             icon = shiny::icon("upload"),
                             width = "100%"),
         hr(),
-        actionButton("download", "Launch download panel",
+        actionButton("download", "Launch download panel", width = "100%",
                      style = "background-color: #1F2956; font-style: strong;"),
         style = "padding: 5px; background-color: #53A9DC;"
     )
