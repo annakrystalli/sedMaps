@@ -41,17 +41,22 @@ panel_extract_mode <- function(){
 #' @return create in-built sf wellpanel
 #' @export
 panel_select_sf <- function(){
+    
+    options <- list.files("data/sf")
+
+    
     shiny::wellPanel(
-        shiny::helpText("Use in-built maritime boundary polygons to extract data"),
         shiny::selectInput("select_sf", "Select Maritime Boundaries",
                            choices = list.files("data/sf"),
                            selected = NULL),
+        shiny::helpText("Use in-built maritime boundary polygons to extract data"),
         shiny::actionButton("load_sf", label = "Load",
                             icon = shiny::icon("upload"),
                             width = "100%"),
         hr(),
-        actionButton("download", "Launch download panel"),
-        style = "padding: 5px;"
+        actionButton("download", "Launch download panel",
+                     style = "background-color: #1F2956; font-style: strong;"),
+        style = "padding: 5px; background-color: #53A9DC;"
     )
 } 
 
@@ -69,8 +74,11 @@ download_modal <- function(){
     shiny::modalDialog(
         shiny::strong(shiny::h5("Selected data layers")),
         shiny::textOutput("layer_info"),
+        shiny::br(),
         shiny::strong(shiny::h5("Extraction vector layers")),
         shiny::textOutput("polygon_info"),
+        shiny::br(),
+        shiny::hr(),
         shiny::strong(shiny::h5("Summary statistics")),
         shiny::checkboxGroupInput("sum_stats", 
                               label = "Choose summary statistics",
@@ -135,5 +143,6 @@ select_box <- function(panel = "layers"){
                      select_button(panel, "deselect"), 
                      style = "padding: 5px;")
 }
+
 
 
