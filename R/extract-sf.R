@@ -65,10 +65,8 @@ extr_values <-  function(rst, sf)  {
 }
 
 extr_summaries <- function(rst, sf, 
-                           fun = c("mean", "min", "max")){
-    fun <- match.arg(fun, 
-                     c("mean", "max", "min", "median", "sd"),
-                     several.ok = TRUE)
+                           fun = c("mean", "min", "max", "median", "sd")){
+    fun <- match.arg(fun, several.ok = TRUE)
     
     purrr::map_df(fun, 
                   ~raster::extract(
