@@ -286,8 +286,12 @@ server <- function(input, output) {
     observeEvent(input$download,
                  {showModal(download_modal())})
     
-    output$layer_info <-  renderPrint({
+    output$layer_info <-  renderText({
+        if(is.null(v$selected_varnames)){
+            "None selected"
+        }else{
         v$selected_varnames
+        }
     })
     
     output$downloadData <- downloadHandler(
