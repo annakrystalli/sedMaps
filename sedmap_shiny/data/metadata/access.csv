@@ -1,3 +1,5 @@
 fileName,name,contentUrl,fileFormat
 sed_maps.rds,Sedimentary environment maps,10.15129/1e27b806-1eae-494d-83b5-a5f4792c46fc,grd
 mmo_marine_plan_areas.rds,MMO marine planning areas,http://environment.data.gov.uk/ds/catalogue/#/717c3263685fb28c803322c93a281741,shp
+jncc_regional_seas.rds,UK Regional Seas,NA,rds
+scottish_eez.rds,Scottish Exclusive Economic Zone,NA,rds
