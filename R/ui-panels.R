@@ -63,23 +63,28 @@ panel_select_sf <- function(){
 #' @export
 #'
 download_modal <- function(){
-    argList <- args(extr_summaries) %>% as.list()
+    options <- args(extr_summaries) %>% as.list() %>% 
+        .[["fun"]] %>% as.character() %>% .[-1]
     
     shiny::modalDialog(
-        shiny::h5("Selected layers"),
-        shiny::verbatimTextOutput("layer_info"),
-        shiny::verbatimTextOutput("polygon_info"),
-        shiny::h5("summary stats"),
+        shiny::strong(shiny::h5("Selected data layers")),
+        shiny::textOutput("layer_info"),
+        shiny::strong(shiny::h5("Extraction vector layers")),
+        shiny::textOutput("polygon_info"),
+        shiny::strong(shiny::h5("Summary statistics")),
         shiny::checkboxGroupInput("sum_stats", 
                               label = "Choose summary statistics",
-                              choices = argList$fun,
+                              choices = options,
                               inline = TRUE),
-        shiny::h5("raw data"),
+        shiny::br(),
+        shiny::hr(),
+        shiny::strong(shiny::h5("Raw data")),
         shiny::checkboxGroupInput("raw_data_format", 
                                   label = "data format", 
-                                  choices = c("csv", "raster")),
+                                  choices = c("csv", "raster"),
+                                  inline = T),
         downloadButton("downloadData", label = "Download", class = NULL),
-        title = "Download Data", footer = modalButton("Dismiss"),
+        title = "Download Data", footer = modalButton("Cancel"),
         size = c("m", "s", "l"), easyClose = FALSE)
 }
 

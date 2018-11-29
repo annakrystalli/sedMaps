@@ -2,10 +2,13 @@
 % Please edit documentation in R/ui-panels.R
 \name{download_modal}
 \alias{download_modal}
-\title{Title}
+\title{Download modal panel}
 \usage{
 download_modal()
 }
+\value{
+create download modal panel
+}
 \description{
-Title
+Download modal panel
 }

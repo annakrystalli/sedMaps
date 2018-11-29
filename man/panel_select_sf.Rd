@@ -2,10 +2,13 @@
 % Please edit documentation in R/ui-panels.R
 \name{panel_select_sf}
 \alias{panel_select_sf}
-\title{Select sf wellpanel}
+\title{Select in-built sf wellpanel}
 \usage{
 panel_select_sf()
 }
+\value{
+create in-built sf wellpanel
+}
 \description{
-Select sf wellpanel
+Select in-built sf wellpanel
 }
