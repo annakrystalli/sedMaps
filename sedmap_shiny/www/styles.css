@@ -2,10 +2,20 @@
   position: fixed;
   right: 10px;
   top: 5px;
+  background-color: #EAF3F7;
 }
 
 
-.main-header {max-height: 300px}
-navbar {min-height: 300px}
-body {padding-top: 70px;}
+.navbar {min-height: 60px;}
+.leaflet {margin-top: 60px;}
+
+.title {font-size: 200%;}
+
+
+.shiny-text-output { 
+    background-color: #53A9DC;
+    font-style: italic;
+    border: 2px black;
+    padding: 15px;
+}
 
