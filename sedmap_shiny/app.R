@@ -231,6 +231,8 @@ server <- function(input, output) {
         input$option
         input$opacity}, {
             req(input$opacity)
+            req(input$option)
+            req(input$varname_sed)
             raster_layer()
         })
     
