@@ -14,6 +14,7 @@ library(raster)
 library(rgdal)
 library(leaflet)
 library(htmlwidgets)
+library(shinyWidgets)
 library(htmltools)
 library(leaflet.extras)
 library(readr)
@@ -42,7 +43,7 @@ ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
                 
                 # ---- Application-title ----
                 navbarPage(windowTitle = page_title,
-                    position = "fixed-top",
+                           position = "fixed-top",
                            title =
                                div(
                                    div(
@@ -58,6 +59,7 @@ ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
                            tabPanel("extract")),
                 
                 
+                
                 # ---- Leaflet-plot ----
                 leafletOutput("leaflet", width = "100%",  height="1000px"),
                 
@@ -66,7 +68,31 @@ ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
                     top = 70, left = 20, width = 270,
                     draggable = TRUE,
                     wellPanel(
-                        h3("Layers"),
+                        fluidRow(
+                            column(8, h3("Layers")),
+                            column(4, 
+                                   # ---- Layer-preferences-dropdown ----
+                                   shinyWidgets::dropdownButton(
+                                       h4("Layer preferences"),
+                                       hr(),
+                                       sliderInput("opacity",h5("Layer opacity"),
+                                                   min = 0,
+                                                   max = 1,
+                                                   value = 0.8),
+                                       selectInput("option", label = h5("Palette"), 
+                                                   choices = list("magma" = "A", "inferno" = "B",
+                                                                  "plasma" = "C", "viridis" = "D"), 
+                                                   selected = "A"),
+                                       selectInput("basemap", label = h5("Basemap"), 
+                                                   choices = leaflet::providers, 
+                                                   selected = "Esri.OceanBasemap"),
+                                       # dropdown settings
+                                       label = "Map preferences",
+                                       circle = TRUE, status = "info", 
+                                       icon = icon("gear"), width = "300px",
+                                       right = FALSE, tooltip = TRUE))
+                        ),
+                        
                         tabsetPanel(id = "data", type = "tabs", selected = "sed",
                                     tabPanel("Sediment", value = "sed",
                                              hr(), 
@@ -76,27 +102,6 @@ ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
                                              hr(),
                                              uiOutput("dis_panel"))
                         )
-                    )
-                ),
-                
-                # ---- Map-tools ----
-                absolutePanel(
-                    bottom = 20, right = 20, width = 300,
-                    draggable = TRUE,
-                    wellPanel(h4("Map tools"),
-                              hr(),
-                              sliderInput("opacity",h5("Layer opacity"),
-                                          min = 0,
-                                          max = 1,
-                                          value = 0.8),
-                              selectInput("option", label = h5("Palette"), 
-                                          choices = list("magma" = "A", "inferno" = "B",
-                                                         "plasma" = "C", "viridis" = "D"), 
-                                          selected = "A"),
-                              selectInput("basemap", label = h5("Basemap"), 
-                                          choices = leaflet::providers, 
-                                          selected = "Esri.OceanBasemap")
-                              
                     )
                 ),
                 absolutePanel(
@@ -164,7 +169,7 @@ server <- function(input, output) {
     sf_base_layer <- reactive({
         req(v$sf)
         leaflet::leafletProxy(mapId = "leaflet") %>%
-        leaflet::clearGroup("sf") 
+            leaflet::clearGroup("sf") 
         
         lflt_sf(sf = v$sf, label = glue::glue("{v$sf$id}: {v$sf$descr} +"))
     })
@@ -254,18 +259,18 @@ server <- function(input, output) {
         if(input$mode == "extract"){
             
             output$select_sf <- renderUI({render_select_sf()})
-     
-                leaflet::leafletProxy("leaflet") %>% 
-                    addDrawToolbar(
-                        targetGroup = 'draw',
-                        position = "topright",
-                        circleOptions = F,
-                        circleMarkerOptions = F,
-                        editOptions = editToolbarOptions(
-                            selectedPathOptions = 
-                                selectedPathOptions())) %>%
-                    addLayersControl(overlayGroups = 'draw', options =
-                                         layersControlOptions(collapsed=FALSE))
+            
+            leaflet::leafletProxy("leaflet") %>% 
+                addDrawToolbar(
+                    targetGroup = 'draw',
+                    position = "topright",
+                    circleOptions = F,
+                    circleMarkerOptions = F,
+                    editOptions = editToolbarOptions(
+                        selectedPathOptions = 
+                            selectedPathOptions())) %>%
+                addLayersControl(overlayGroups = 'draw', options =
+                                     layersControlOptions(collapsed=FALSE))
         }
         if(input$mode == "view"){
             output$select_sf <- NULL
@@ -296,18 +301,18 @@ server <- function(input, output) {
     
     observeEvent({
         #input$leaflet_draw_new_feature
-                 #input$leaflet_draw_deleted_features
-                 input$leaflet_draw_all_features
-                 #input$leaflet_draw_deletestop
-                 }, {
+        #input$leaflet_draw_deleted_features
+        input$leaflet_draw_all_features
+        #input$leaflet_draw_deletestop
+    }, {
         #dput(input$leaflet_draw_new_feature)
         #print(drawFeature2sf(input$leaflet_draw_new_feature),)
-                     print(input$leaflet_sf)
+        print(input$leaflet_sf)
         print(input$leaflet_groups, 2)
     })
 }
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-         
+
 
