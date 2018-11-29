@@ -41,13 +41,12 @@ panel_extract_mode <- function(){
 #' @return create in-built sf wellpanel
 #' @export
 panel_select_sf <- function(){
-    
-    options <- list.files("data/sf")
+    choices <- list.files("data/sf") %>% 
+        setNames(purrr::map_chr(., ~fileName_meta(.x)))
 
-    
     shiny::wellPanel(
         shiny::selectInput("select_sf", "Select Maritime Boundaries",
-                           choices = list.files("data/sf"),
+                           choices = choices,
                            selected = NULL),
         shiny::helpText("Use in-built maritime boundary polygons to extract data"),
         shiny::actionButton("load_sf", label = "Load",
@@ -145,4 +144,22 @@ select_box <- function(panel = "layers"){
 }
 
 
+
+
+#' Get descriptive label
+#'
+#' Create a more descriptive label, including units where appropriate, for a
+#' variable from information in the metadata table.
+#' @param fileName the file for which metadata is to be returned
+#' @param return_field character string. field to be returned for fileName
+#'
+#' @return a character string descriptive label of the variable
+fileName_meta <- function(fileName, return_field = "name"){
+    return_field <- match.arg(return_field, choices = names(access))
+    
+    if(!fileName %in% access$fileName){
+        stop(fileName, " not a valid fileName")
+    }
+    access[access$fileName == fileName, return_field, drop = T]
+}
 
