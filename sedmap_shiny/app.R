@@ -18,7 +18,7 @@ library(htmltools)
 library(leaflet.extras)
 library(readr)
 
-options(shiny.trace=TRUE)
+options(shiny.trace=FALSE)
 #options(shiny.fullstacktrace=TRUE)
 
 # ---- load_data ----
