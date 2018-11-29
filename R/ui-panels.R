@@ -44,17 +44,46 @@ panel_extract_mode <- function(){
 #' @examples
 panel_select_sf <- function(){
     shiny::wellPanel(
+        shiny::helpText("Use in-built maritime boundary polygons to extract data"),
         shiny::selectInput("select_sf", "Select Maritime Boundaries",
                            choices = list.files("data/sf"),
                            selected = NULL),
         shiny::actionButton("load_sf", label = "Load",
                             icon = shiny::icon("upload"),
-                            width = "100%"), 
+                            width = "100%"),
+        hr(),
+        actionButton("download", "Show download panel"),
         style = "padding: 5px;"
     )
-  #""  
-    
 } 
+
+
+
+#' Title
+#'
+#' @return
+#' @export
+#'
+#' @examples
+download_modal <- function(){
+    shiny::modalDialog(
+        shiny::h5("Selected layers"),
+        shiny::verbatimTextOutput("layer_info"),
+        shiny::verbatimTextOutput("polygon_info"),
+        shiny::h5("summary stats"),
+        shiny::selectizeInput("sum_stats", 
+                              label = "Choose summary statistics",
+                              choices = c("mean", "min", 
+                                          "max", "median", "sd"),
+                              multiple = TRUE),
+        shiny::h5("raw data"),
+        shiny::checkboxGroupInput("raw_data_format", 
+                                  label = "data format", 
+                                  choices = c("csv", "raster")),
+        downloadButton("downloadData", label = "Download", class = NULL),
+        title = "Download Data", footer = modalButton("Dismiss"),
+        size = c("m", "s", "l"), easyClose = FALSE)
+}
 
 #' Title
 #'

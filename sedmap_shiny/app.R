@@ -277,6 +277,23 @@ server <- function(input, output) {
         }
     })
     
+    
+    observeEvent(input$download,
+                 {showModal(download_modal())})
+    
+    output$layer_info <-  renderPrint({
+        v$selected_varnames
+    })
+    
+    output$downloadData <- downloadHandler(
+        filename = function() {
+            paste("merp-", Sys.Date(), ".csv", sep="")
+        },
+        content = function(file) {
+            write.csv(data, file)
+        }
+    )
+    
     observeEvent({
         #input$leaflet_draw_new_feature
                  #input$leaflet_draw_deleted_features
