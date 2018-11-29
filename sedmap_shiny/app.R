@@ -49,8 +49,9 @@ ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
                                    div(
                                        id = "logo-merp",
                                        img(src = "merp-logo-long.png",
-                                           height = 50,
-                                           width = 250)
+                                           height = 50),
+                                       img(src = "tuos_blue_logo.png",
+                                           height = 50)
                                    ),
                                    page_title
                                ),
@@ -105,8 +106,8 @@ ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
                     )
                 ),
                 absolutePanel(
-                    top = 80, right = 70, width = 170,
-                    draggable = FALSE,
+                    top = 80, right = 70, width = 280,
+                    draggable = TRUE,
                     uiOutput("select_sf"))
 )
 
