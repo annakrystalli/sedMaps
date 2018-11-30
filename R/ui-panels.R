@@ -14,10 +14,10 @@ panel_layers <- function(panel = c("sed", "dis"),
     mode <- match.arg(mode)
     
     switch(mode,
-           "view" = radioButtons(glue::glue("varname_{panel}"), label = h4("Select layer"),
+           "view" = radioButtons(glue::glue("varname_{panel}"), label = h4("Select data layer"),
                                  choices =  varnames[[panel]], 
                                  selected =  varnames[[panel]][1]),
-           "extract" = checkboxGroupInput(glue::glue("varname_{panel}"), label = h4("Select layer"),
+           "extract" = checkboxGroupInput(glue::glue("varname_{panel}"), label = h4("Select data layer"),
                                           choices =  varnames[[panel]], 
                                           selected =  NULL)
     )
