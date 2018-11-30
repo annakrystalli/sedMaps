@@ -17,10 +17,11 @@
 extr_sedmap_data <- function(rst, sf, 
                              select_rst = NULL,
                              select_sf = NULL,
-                             output = c("summaries", "values", "raster"),
+                             output = c("summaries", "csv", "raster"),
                              fun = c("mean", "min", "max", "median", "sd"),
                              sf_crs = FALSE,
-                             out_dir){
+                             out_dir,
+                             rst_out_format = c("stack", "tiff")){
     #on.exit(rm(tmp))
     
     if(sf_crs){
@@ -44,20 +45,19 @@ extr_sedmap_data <- function(rst, sf,
     
     output <- match.arg(output, several.ok = T)
     fun <- match.arg(fun, several.ok = T)
+    rst_out_format <- match.arg(rst_out_format)
     
     if("summaries" %in% output){
         extr_summaries(rst, sf, fun) %>%
             readr::write_csv(path = file.path(out_dir, "sedmaps_summaries.csv"))
     }
-    if("values" %in% output){
+    if("csv" %in% output){
         extr_values(rst, sf) %>%
             readr::write_csv(path = file.path(out_dir, "sedmaps_values.csv"))
     }
     if("raster" %in% output){
         extr_raster(rst, sf) %>%
-            raster::writeRaster(filename = file.path(out_dir, 
-                                                     "sedmaps_raster.grd"),
-                                overwrite = TRUE)
+            rst_export(format = rst_out_format, out_dir = out_dir)
     }
     
 }
@@ -95,15 +95,24 @@ extr_summaries <- function(rst, sf,
                       dplyr::mutate(id = sf$id, 
                                     stat = .x) %>%
                       dplyr::select(id, stat, dplyr::everything())) %>%
+        clean_non_finite() %>%
         dplyr::arrange(as.numeric(id))
 }
 
 extr_raster <- function(rst, sf){    
-    raster::stack(
-        raster::rasterize(sf, rst) %>% 
-            stats::setNames("sf") %>%
-            raster::ratify(),
-        raster::mask(rst, sf))
+    # arrange sf
+    sf <- dplyr::arrange(sf, id)
+    
+    # rasterise / ratify
+    rat <- dplyr::select(sf, id, descr) %>%
+        dplyr::rename("ID" = id)
+    sf::st_geometry(rat) <- NULL
+    rst_sf <-  raster::rasterize(sf, rst[[1]]) %>% 
+        setNames("sf_id") %>%
+        raster::ratify()
+    levels(rst_sf) <- rat
+    
+    raster::stack(rst_sf, raster::mask(rst, sf)) 
 }
 
 #' Title
@@ -138,3 +147,31 @@ drawFeature2sf <- function(feature){
               geometry = sf::st_sfc(wkt, crs = 4326)) %>% 
         dplyr::mutate(area = sf::st_area(.))
 }
+
+rst_export <- function(rst_out, 
+                       format, 
+                       out_dir){
+    switch(format,
+           "tiff" = {
+               tiff_path <- file.path(out_dir, "raster")
+               dir.create(tiff_path, showWarnings = FALSE)
+               
+               raster::writeRaster(rst_out, 
+                                   filename = file.path(tiff_path, "sedmaps.tif"),
+                                   bylayer = T, suffix = names(rst_out))},
+           "stack" = {
+               raster::writeRaster(rst_out, 
+                                   filename = file.path(out_dir, 
+                                                        "sedmaps_stack.grd"))
+           })
+}
+
+non_finite2na <- function(x){
+    x[!is.finite(x)] <- NA
+    x}
+
+clean_non_finite <- function(df){
+    purrr::map_if(df, is.numeric, ~non_finite2na(.x)) %>%
+        as_tibble() %>% mutate(id = as.integer(id))
+}
+
