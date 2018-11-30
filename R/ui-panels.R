@@ -68,8 +68,6 @@ panel_select_sf <- function(){
 #' @export
 #'
 download_modal <- function(){
-    options <- args(extr_summaries) %>% as.list() %>% 
-        .[["fun"]] %>% as.character() %>% .[-1]
     
     shiny::modalDialog(
         shiny::strong(shiny::h5("Selected data layers")),
@@ -82,7 +80,7 @@ download_modal <- function(){
         shiny::strong(shiny::h5("Summary statistics")),
         shiny::checkboxGroupInput("sum_stats", 
                               label = "Choose summary statistics",
-                              choices = options,
+                              choices = fun_choices(),
                               inline = TRUE),
         shiny::br(),
         shiny::hr(),

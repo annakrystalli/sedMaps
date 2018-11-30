@@ -62,6 +62,11 @@ extr_sedmap_data <- function(rst, sf,
     
 }
 
+fun_choices <- function(){
+    args(extr_sedmap_data) %>% as.list() %>% 
+        .[["fun"]] %>% as.character() %>% .[-1]
+}
+
 extr_values <-  function(rst, sf)  {
     raster::extract(rst, sf, cellnumbers = T) %>%
         purrr::map2(sf$id, 
@@ -79,7 +84,8 @@ extr_values <-  function(rst, sf)  {
 extr_summaries <- function(rst, sf, 
                            fun){
     prop_data <- function(x, ...) length(na.omit(x))/length(x)
-    
+    fun <- match.arg(fun, choices = fun_choices(),
+                     several.ok = TRUE)
     purrr::map_df(fun, 
                   ~raster::extract(
                       rst, sf, 
