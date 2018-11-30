@@ -297,10 +297,31 @@ server <- function(input, output) {
     
     output$downloadData <- downloadHandler(
         filename = function() {
-            paste("merp-", Sys.Date(), ".csv", sep="")
+            paste("merp-sedmaps-out-", Sys.Date(), ".zip", sep="")
         },
         content = function(file) {
-            write.csv(data, file)
+            tmp <- tempdir()
+            out_dir <- file.path(tmp, "out")
+            dir.create(out_dir)
+            
+            if(!is.null(input$sum_stats)){
+                output <- c("summaries", input$raw_data_format)
+            }else{output <- input$raw_data_format}
+            
+            extr_sedmap_data(rst, sf = v$sf, 
+                             select_rst = v$selected_varnames, 
+                             select_sf = NULL,
+                             output = output,
+                             fun = input$sum_stats,
+                             out_dir = out_dir, 
+                             rst_out_format = "stack")
+            app_wd <- getwd()
+            print(app_wd)
+            setwd(out_dir)
+            zip(zipfile = file, files = list.files(".", recursive = T))
+            setwd(app_wd)
+            file.remove(list.files(out_dir, recursive = T, 
+                                   full.names = T))
         }
     )
     
