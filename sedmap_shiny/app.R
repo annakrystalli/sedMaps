@@ -316,7 +316,6 @@ server <- function(input, output) {
                              out_dir = out_dir, 
                              rst_out_format = "stack")
             app_wd <- getwd()
-            print(app_wd)
             setwd(out_dir)
             zip(zipfile = file, files = list.files(".", recursive = T))
             setwd(app_wd)
