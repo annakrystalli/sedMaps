@@ -1,9 +1,26 @@
+#' Extract sedmap data
+#'
+#' @param rst sedmaps data raster stack
+#' @param sf extraction simple feature
+#' @param select_rst raster layers to be extracted
+#' @param select_sf sf layers to use for extraction
+#' @param output character vector of extraction output formats
+#' @param fun summary functions to apply for each data x extraction layer. `sd`
+#'  ignored for points
+#' @param sf_crs whether output data should be converted to the sf crs
+#' @param out_dir path to output directory
+#'
+#' @return outputs written out to `out_dir`.
+#' @export
+#'
+#' @importFrom stats sd median
 extr_sedmap_data <- function(rst, sf, 
                              select_rst = NULL,
                              select_sf = NULL,
-                             output = "summaries",
-                             fun = c("mean", "min", "max"),
-                             sf_crs = FALSE){
+                             output = c("summaries", "values", "raster"),
+                             fun = c("mean", "min", "max", "median", "sd"),
+                             sf_crs = FALSE,
+                             out_dir){
     #on.exit(rm(tmp))
     
     if(sf_crs){
@@ -22,51 +39,46 @@ extr_sedmap_data <- function(rst, sf,
         select_sf <- match.arg(select_sf, 
                                sf$id,
                                several.ok = TRUE)
-        sf <- sf %>% filter(id %in% select_sf)
+        sf <- sf %>% dplyr::filter(id %in% select_sf)
     }
-    output <- match.arg(output, c("summaries", "values", "raster"))
     
-    tmp <- tempdir()
+    output <- match.arg(output, several.ok = T)
+    fun <- match.arg(fun, several.ok = T)
     
     if("summaries" %in% output){
         extr_summaries(rst, sf, fun) %>%
-            readr::write_csv(file.path(tmp, "sedmaps_summaries.csv"))
+            readr::write_csv(path = file.path(out_dir, "sedmaps_summaries.csv"))
     }
     if("values" %in% output){
         extr_values(rst, sf) %>%
-            readr::write_csv(file.path(tmp, "sedmaps_values.csv"))
+            readr::write_csv(path = file.path(out_dir, "sedmaps_values.csv"))
     }
     if("raster" %in% output){
         extr_raster(rst, sf) %>%
-            raster::writeRaster(filename="raster.grd",
-                                overwrite=TRUE)
+            raster::writeRaster(filename = file.path(out_dir, 
+                                                     "sedmaps_raster.grd"),
+                                overwrite = TRUE)
     }
     
 }
-
-
-
-
-
-
 
 extr_values <-  function(rst, sf)  {
     raster::extract(rst, sf, cellnumbers = T) %>%
         purrr::map2(sf$id, 
                     ~tibble::as_tibble(.x) %>%
-                        mutate(id = .y)) %>%
+                        dplyr::mutate(id = .y)) %>%
         do.call(dplyr::bind_rows, .) %>% 
         dplyr::bind_cols(
             raster::xyFromCell(rst, .$cell) %>%
                 tibble::as.tibble()) %>%
-        select(id, cell, x, y, everything()) %>%
-        arrange(as.numeric(id), cell)
+        dplyr::select(id, cell, x, y, dplyr::everything()) %>%
+        dplyr::arrange(as.numeric(id), cell)
     
 }
 
 extr_summaries <- function(rst, sf, 
-                           fun = c("mean", "min", "max", "median", "sd")){
-    fun <- match.arg(fun, several.ok = TRUE)
+                           fun){
+    prop_data <- function(x, ...) length(na.omit(x))/length(x)
     
     purrr::map_df(fun, 
                   ~raster::extract(
@@ -76,15 +88,14 @@ extr_summaries <- function(rst, sf,
                       tibble::as.tibble() %>% 
                       dplyr::mutate(id = sf$id, 
                                     stat = .x) %>%
-                      select(id, stat, everything())) %>%
-        arrange(as.numeric(id))
+                      dplyr::select(id, stat, dplyr::everything())) %>%
+        dplyr::arrange(as.numeric(id))
 }
-
 
 extr_raster <- function(rst, sf){    
     raster::stack(
         raster::rasterize(sf, rst) %>% 
-            setNames("sf") %>%
+            stats::setNames("sf") %>%
             raster::ratify(),
         raster::mask(rst, sf))
 }
@@ -113,11 +124,11 @@ drawFeature2sf <- function(feature){
                            ncol=2,
                            byrow=TRUE)),
                    "Point" = sf::st_point(unlist(
-                           feature$geometry$coordinates)))
+                       feature$geometry$coordinates)))
     
     sf::st_sf(id = feature[["properties"]][["_leaflet_id"]],
               descr = glue::glue(
                   'drawn {type} {id}'),
               geometry = sf::st_sfc(wkt, crs = 4326)) %>% 
-        mutate(area = sf::st_area(.))
+        dplyr::mutate(area = sf::st_area(.))
 }
