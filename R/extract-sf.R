@@ -115,17 +115,15 @@ extr_raster <- function(rst, sf){
     raster::stack(rst_sf, raster::mask(rst, sf)) 
 }
 
-#' Title
+#' Convert a drawn leaflet feature to sf
 #'
-#' @param feature 
+#' @param feature drawn leaflet feature
 #'
-#' @return
+#' @return a simple feature object of the leaflet feature
 #' @export
-#'
-#' @examples
 drawFeature2sf <- function(feature){
     type <- feature$geometry$type
-    id <- feature[["properties"]][["_leaflet_id"]]
+    id <- glue::glue('drawn_{feature[["properties"]][["_leaflet_id"]]}')
     
     wkt <- switch (type,
                    "Polygon" = sf::st_polygon(

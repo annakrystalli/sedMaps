@@ -2,13 +2,16 @@
 % Please edit documentation in R/extract-sf.R
 \name{drawFeature2sf}
 \alias{drawFeature2sf}
-\title{Title}
+\title{Convert a drawn leaflet feature to sf}
 \usage{
 drawFeature2sf(feature)
 }
 \arguments{
-\item{feature}{}
+\item{feature}{drawn leaflet feature}
+}
+\value{
+a simple feature object of the leaflet feature
 }
 \description{
-Title
+Convert a drawn leaflet feature to sf
 }
