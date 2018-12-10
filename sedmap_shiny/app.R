@@ -19,8 +19,8 @@ library(htmltools)
 library(leaflet.extras)
 library(readr)
 
-options(shiny.trace=FALSE)
-#options(shiny.fullstacktrace=TRUE)
+options(shiny.trace=TRUE)
+options(shiny.fullstacktrace=TRUE)
 
 # ---- load_data ----
 rst <- raster::stack("data/raster/sed_maps.grd")
@@ -114,7 +114,7 @@ ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
 
 
 # ---- Define-server-logic ---- 
-server <- function(input, output) {
+server <- function(input, output, session) {
     v <- reactiveValues(selected_varnames = NULL,
                         varname = NULL,
                         sf = NULL)
@@ -308,6 +308,14 @@ server <- function(input, output) {
                 output <- c("summaries", input$raw_data_format)
             }else{output <- input$raw_data_format}
             
+            
+            v$out_sf <- collate_extr_shapes(v$sf, input$leaflet_draw_all_features,
+                                            input$leaflet_groups)
+            
+            if(nrow(v$out_sf) == 0){
+             shinyWidgets::sendSweetAlert(session = session, title = "Error", text = "No shapes to use for extraction specified", type = "error",
+                                                   btn_labels = "Ok", html = FALSE, closeOnClickOutside = TRUE)}
+            
             extr_sedmap_data(rst, sf = v$sf, 
                              select_rst = v$selected_varnames, 
                              select_sf = NULL,
@@ -334,6 +342,7 @@ server <- function(input, output) {
         #print(drawFeature2sf(input$leaflet_draw_new_feature),)
         print(input$leaflet_sf)
         print(input$leaflet_groups, 2)
+        print(input$leaflet_draw_all_features)
     })
 }
 
