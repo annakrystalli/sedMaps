@@ -159,10 +159,12 @@ collate_extr_shapes <- function(sf, draw, leaflet_groups){
     if(!"sf" %in% leaflet_groups){sf <- NULL}
     
     if(!is.null(draw)){
-    draw_sf <- purrr::map_df(draw, drawFeature2sf(.x))}else{
-        draw_sf <- NULL
-    }
-    dplyr::bind_rows(sf, draw_sf)
+        draw_sf <- purrr::map(draw$features, 
+                              ~drawFeature2sf(.x)) %>% 
+            do.call(rbind, .)}else{
+                draw_sf <- NULL
+            }
+    rbind(sf, draw_sf)
 }
 
 rst_export <- function(rst_out, 
