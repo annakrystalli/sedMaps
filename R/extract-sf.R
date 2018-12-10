@@ -150,10 +150,14 @@ drawFeature2sf <- function(feature){
 #'
 #' @param sf loaded in-built sf
 #' @param draw list of drawn leaflet features 
+#' @param leaflet_groups character vector of selected leaflet groups
 #'
 #' @return sf of input sf and draw features
 #' @export
-collate_extr_shapes <- function(sf, draw){
+collate_extr_shapes <- function(sf, draw, leaflet_groups){
+    if(!"draw" %in% leaflet_groups){draw <- NULL}
+    if(!"sf" %in% leaflet_groups){sf <- NULL}
+    
     if(!is.null(draw)){
     draw_sf <- purrr::map_df(draw, drawFeature2sf(.x))}else{
         draw_sf <- NULL

@@ -4,12 +4,14 @@
 \alias{collate_extr_shapes}
 \title{Collate extraction shapes}
 \usage{
-collate_extr_shapes(sf, draw)
+collate_extr_shapes(sf, draw, leaflet_groups)
 }
 \arguments{
 \item{sf}{loaded in-built sf}
 
 \item{draw}{list of drawn leaflet features}
+
+\item{leaflet_groups}{character vector of selected leaflet groups}
 }
 \value{
 sf of input sf and draw features
