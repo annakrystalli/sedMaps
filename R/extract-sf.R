@@ -140,8 +140,8 @@ drawFeature2sf <- function(feature){
                        feature$geometry$coordinates)))
     
     sf::st_sf(source = "user",
-              id = glue::glue('drw_{id}'),
-              descr = glue::glue('drawn leaflet {type}: {id}'),
+              id = glue::glue('usr_{id}'),
+              descr = glue::glue('Drawn Leaflet {type}: {id}'),
               geometry = sf::st_sfc(wkt, crs = 4326)) %>% 
         dplyr::mutate(area = sf::st_area(.))
 }
@@ -165,7 +165,11 @@ collate_extr_shapes <- function(sf, draw, leaflet_groups){
             do.call(rbind, .)}else{
                 draw_sf <- NULL
             }
-    rbind(sf, draw_sf)
+    if(!is.null(sf)){
+        sf <- mutate(sf, id = stringr::str_pad(id, 3, pad = "0"))
+    }
+    rbind(sf, draw_sf) %>%
+       dplyr::arrange(id)
 }
 
 rst_export <- function(rst_out, 
