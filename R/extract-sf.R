@@ -123,7 +123,7 @@ extr_raster <- function(rst, sf){
 #' @export
 drawFeature2sf <- function(feature){
     type <- feature$geometry$type
-    id <- glue::glue('drawn_{feature[["properties"]][["_leaflet_id"]]}')
+    id <- feature[["properties"]][["_leaflet_id"]]
     
     wkt <- switch (type,
                    "Polygon" = sf::st_polygon(
@@ -139,11 +139,26 @@ drawFeature2sf <- function(feature){
                    "Point" = sf::st_point(unlist(
                        feature$geometry$coordinates)))
     
-    sf::st_sf(id = feature[["properties"]][["_leaflet_id"]],
-              descr = glue::glue(
-                  'drawn {type} {id}'),
+    sf::st_sf(id = glue::glue('drw_{id}'),
+              descr = glue::glue('drawn leaflet {type}: {id}'),
               geometry = sf::st_sfc(wkt, crs = 4326)) %>% 
         dplyr::mutate(area = sf::st_area(.))
+}
+
+
+#' Collate extraction shapes
+#'
+#' @param sf loaded in-built sf
+#' @param draw list of drawn leaflet features 
+#'
+#' @return sf of input sf and draw features
+#' @export
+collate_extr_shapes <- function(sf, draw){
+    if(!is.null(draw)){
+    draw_sf <- purrr::map_df(draw, drawFeature2sf(.x))}else{
+        draw_sf <- NULL
+    }
+    dplyr::bind_rows(sf, draw_sf)
 }
 
 rst_export <- function(rst_out, 
