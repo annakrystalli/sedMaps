@@ -96,7 +96,7 @@ extr_summaries <- function(rst, sf,
                                     stat = .x) %>%
                       dplyr::select(id, stat, dplyr::everything())) %>%
         clean_non_finite() %>%
-        dplyr::arrange(as.numeric(id))
+        dplyr::arrange(id)
 }
 
 extr_raster <- function(rst, sf){    
