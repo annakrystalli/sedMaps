@@ -139,7 +139,8 @@ drawFeature2sf <- function(feature){
                    "Point" = sf::st_point(unlist(
                        feature$geometry$coordinates)))
     
-    sf::st_sf(id = glue::glue('drw_{id}'),
+    sf::st_sf(source = "user",
+              id = glue::glue('drw_{id}'),
               descr = glue::glue('drawn leaflet {type}: {id}'),
               geometry = sf::st_sfc(wkt, crs = 4326)) %>% 
         dplyr::mutate(area = sf::st_area(.))
@@ -156,7 +157,7 @@ drawFeature2sf <- function(feature){
 #' @export
 collate_extr_shapes <- function(sf, draw, leaflet_groups){
     if(!"draw" %in% leaflet_groups){draw <- NULL}
-    if(!"sf" %in% leaflet_groups){sf <- NULL}
+    if(!"loaded" %in% leaflet_groups){sf <- NULL}
     
     if(!is.null(draw)){
         draw_sf <- purrr::map(draw$features, 
