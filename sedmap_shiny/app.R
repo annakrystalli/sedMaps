@@ -268,6 +268,8 @@ server <- function(input, output, session) {
                 addDrawToolbar(
                     targetGroup = 'draw',
                     position = "topright",
+                    polylineOptions= F,
+                    markerOptions = F, 
                     circleOptions = F,
                     circleMarkerOptions = F,
                     editOptions = editToolbarOptions(
