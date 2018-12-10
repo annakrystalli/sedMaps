@@ -71,10 +71,13 @@ download_modal <- function(){
     
     shiny::modalDialog(
         shiny::strong(shiny::h5("Selected data layers")),
-        shiny::textOutput("layer_info"),
+        shiny::textOutput("data_layer_info"),
         shiny::br(),
         shiny::strong(shiny::h5("Extraction vector layers")),
-        shiny::textOutput("polygon_info"),
+        shiny::h6("Selected extraction groups"),
+        shiny::textOutput("extr_group_info"),
+        shiny::h6("Selected extraction layers"),
+        shiny::tableOutput("extr_layer_info"),
         shiny::br(),
         shiny::hr(),
         shiny::strong(shiny::h5("Summary statistics")),

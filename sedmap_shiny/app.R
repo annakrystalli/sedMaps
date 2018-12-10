@@ -19,8 +19,8 @@ library(htmltools)
 library(leaflet.extras)
 library(readr)
 
-options(shiny.trace=TRUE)
-options(shiny.fullstacktrace=TRUE)
+options(shiny.trace=FALSE)
+options(shiny.fullstacktrace=FALSE)
 
 # ---- load_data ----
 rst <- raster::stack("data/raster/sed_maps.grd")
@@ -117,7 +117,10 @@ ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
 server <- function(input, output, session) {
     v <- reactiveValues(selected_varnames = NULL,
                         varname = NULL,
-                        sf = NULL)
+                        sf = NULL,
+                        out_sf = NULL,
+                        selected_groups = NULL)
+    
     click.list <- shiny::reactiveValues(ids = vector(),
                                         id = vector())
     draw.list <- shiny::reactiveValues()
@@ -283,17 +286,43 @@ server <- function(input, output, session) {
         }
     })
     
+    observeEvent(input$download,{
+        v$out_sf <- collate_extr_shapes(v$sf, 
+                                        input$leaflet_draw_all_features,
+                                        input$leaflet_groups)
+    })
+    
+    output$data_layer_info <-  renderText({
+        if(is.null(v$selected_varnames)){
+            "No data layers selected"
+        }else{
+            glue::glue_collapse(v$selected_varnames, sep = ", ")
+        }
+    })
+    
+    output$extr_group_info <-  renderText({
+        v$selected_groups <- input$leaflet_groups[input$leaflet_groups != "raster"]
+        if(length(v$selected_groups) == 0){
+            "No extraction groups selected"
+        }else{
+            glue::glue_collapse(v$selected_groups, sep = ", ")
+        }
+    })
+    
+    output$extr_layer_info <-  renderTable({
+        if(length(v$out_sf) == 0){
+            "No extraction layers specified"
+        }else{
+            v$out_sf %>% dplyr::select(id, descr) %>% 
+                sf::st_set_geometry(NULL)
+        }
+    })
+    
     
     observeEvent(input$download,
                  {showModal(download_modal())})
     
-    output$layer_info <-  renderText({
-        if(is.null(v$selected_varnames)){
-            "None selected"
-        }else{
-        v$selected_varnames
-        }
-    })
+
     
     output$downloadData <- downloadHandler(
         filename = function() {
@@ -308,15 +337,13 @@ server <- function(input, output, session) {
                 output <- c("summaries", input$raw_data_format)
             }else{output <- input$raw_data_format}
             
+            if(length(v$out_sf) == 0){
+             shinyWidgets::sendSweetAlert(session = session, title = "Error", 
+                                          text = "No shapes to use for extraction specified", 
+                                          type = "error", btn_labels = "Ok", 
+                                          html = FALSE, closeOnClickOutside = TRUE)}
             
-            v$out_sf <- collate_extr_shapes(v$sf, input$leaflet_draw_all_features,
-                                            input$leaflet_groups)
-            
-            if(nrow(v$out_sf) == 0){
-             shinyWidgets::sendSweetAlert(session = session, title = "Error", text = "No shapes to use for extraction specified", type = "error",
-                                                   btn_labels = "Ok", html = FALSE, closeOnClickOutside = TRUE)}
-            
-            extr_sedmap_data(rst, sf = v$sf, 
+            extr_sedmap_data(rst, sf = v$out_sf, 
                              select_rst = v$selected_varnames, 
                              select_sf = NULL,
                              output = output,
@@ -342,7 +369,7 @@ server <- function(input, output, session) {
         #print(drawFeature2sf(input$leaflet_draw_new_feature),)
         print(input$leaflet_sf)
         print(input$leaflet_groups, 2)
-        print(input$leaflet_draw_all_features)
+        dput(input$leaflet_draw_all_features)
     })
 }
 
