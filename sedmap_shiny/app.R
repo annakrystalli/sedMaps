@@ -294,7 +294,7 @@ server <- function(input, output, session) {
     
     output$data_layer_info <-  renderText({
         if(is.null(v$selected_varnames)){
-            "No data layers selected"
+            "No data layers selected. Defaults to ALL"
         }else{
             glue::glue_collapse(v$selected_varnames, sep = ", ")
         }
