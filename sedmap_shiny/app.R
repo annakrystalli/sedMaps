@@ -255,11 +255,6 @@ server <- function(input, output, session) {
         sf_base_layer()
     })
     
-    shiny::observeEvent(input$leaflet_shape_click, {
-        #print(click$id)
-        #sf_add_layer()
-    })
-    
     shiny::observeEvent(input$mode, {
         v$selected_varnames <- NULL
         
@@ -325,7 +320,12 @@ server <- function(input, output, session) {
     
     
     observeEvent(input$download,
-                 {showModal(download_modal())})
+                 if(length(v$out_sf) == 0){
+                     shinyWidgets::sendSweetAlert(session = session, title = "Error", 
+                                                  text = "No shapes to use for extraction specified", 
+                                                  type = "error", btn_labels = "Ok", 
+                                                  html = FALSE, closeOnClickOutside = TRUE)
+                     }else{showModal(download_modal())})
     
 
     
@@ -341,12 +341,6 @@ server <- function(input, output, session) {
             if(!is.null(input$sum_stats)){
                 output <- c("summaries", input$raw_data_format)
             }else{output <- input$raw_data_format}
-            
-            if(length(v$out_sf) == 0){
-             shinyWidgets::sendSweetAlert(session = session, title = "Error", 
-                                          text = "No shapes to use for extraction specified", 
-                                          type = "error", btn_labels = "Ok", 
-                                          html = FALSE, closeOnClickOutside = TRUE)}
             
             extr_sedmap_data(rst, sf = v$out_sf, 
                              select_rst = v$selected_varnames, 
