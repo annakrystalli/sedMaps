@@ -18,6 +18,7 @@ library(shinyWidgets)
 library(htmltools)
 library(leaflet.extras)
 library(readr)
+library(sf)
 
 options(shiny.trace=FALSE)
 options(shiny.fullstacktrace=FALSE)
