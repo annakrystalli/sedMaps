@@ -104,9 +104,11 @@ extr_raster <- function(rst, sf){
     sf <- dplyr::arrange(sf, id)
     
     # rasterise / ratify
-    rat <- dplyr::select(sf, id, descr) %>%
-        dplyr::rename("ID" = id)
-    sf::st_geometry(rat) <- NULL
+    rat <- sf %>% dplyr::rename("ID" = id) %>% 
+        sf::st_set_geometry(NULL) %>%
+        dplyr::select(ID, descr)
+    
+    
     rst_sf <-  raster::rasterize(sf, rst[[1]]) %>% 
         setNames("sf_id") %>%
         raster::ratify()
@@ -140,7 +142,7 @@ drawFeature2sf <- function(feature){
                        feature$geometry$coordinates)))
     
     sf::st_sf(source = "user",
-              id = glue::glue('usr_{id}'),
+              id = id,
               descr = glue::glue('Drawn Leaflet {type}: {id}'),
               geometry = sf::st_sfc(wkt, crs = 4326)) %>% 
         dplyr::mutate(area = sf::st_area(.))
@@ -159,18 +161,28 @@ collate_extr_shapes <- function(sf, draw, leaflet_groups){
     if(!"draw" %in% leaflet_groups){draw <- NULL}
     if(!"loaded" %in% leaflet_groups){sf <- NULL}
     
+    if(!is.null(sf)){
+        sf_max_id <- max(as.numeric(sf$id))
+    }else{sf_max_id <- 0}
+    
     if(!is.null(draw)){
         draw_sf <- purrr::map(draw$features, 
                               ~drawFeature2sf(.x)) %>% 
-            do.call(rbind, .)}else{
-                draw_sf <- NULL
-            }
-    if(!is.null(sf)){
-        sf <- mutate(sf, id = stringr::str_pad(id, 3, pad = "0"))
+            do.call(rbind, .) %>%
+            mutate(id = as.numeric(rownames(.)) + sf_max_id) 
+    }else{
+        draw_sf <- NULL
     }
     rbind(sf, draw_sf) %>%
-       dplyr::arrange(id)
+        groom_sf()
 }
+
+groom_sf <- function(sf){
+    if(is.null(sf)){sf}else{
+    mutate(sf, id = as.integer(id)) %>%
+        dplyr::arrange(id)}
+}
+
 
 rst_export <- function(rst_out, 
                        format, 
