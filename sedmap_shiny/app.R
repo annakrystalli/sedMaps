@@ -132,11 +132,14 @@ server <- function(input, output, session) {
     get_label <- reactive({switch(input$data,
                                   "sed" = input$varname_sed[length(input$varname_sed)],
                                   "dis" = input$varname_dis[length(input$varname_dis)])})
+    get_selected_varnames <- reactive({
+        c(input$varname_sed, input$varname_dis)
+    })
     
     get_last_varname <- reactive({
         v$selected_varnames <- update_selected_varnames(
             selected = v$selected_varnames,
-            get_varname())
+            get_selected_varnames())
         v$selected_varnames[length(v$selected_varnames)]
     })
     

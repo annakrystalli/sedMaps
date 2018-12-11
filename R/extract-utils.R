@@ -10,12 +10,18 @@
 #'
 #' @examples
 update_selected_varnames <- function(selected = NULL, new){
+
     if(is.null(selected)){
         return(new)}
-    # add variable to end
-    if(length(new) > length(selected)){ 
-        c(selected, new[!new %in% selected])
-    }else{
+    if(is.null(new)){
+        return(selected)}
+    
+    test_new <- new %in% selected
+    if(all(test_new)){
+        # add remove last variable
         selected[selected %in% new]
+    }else{
+        # add variable to end
+        c(selected, new[!test_new])
     }
 }
