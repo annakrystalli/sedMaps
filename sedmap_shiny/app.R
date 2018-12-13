@@ -54,7 +54,8 @@ ui <- fluidPage(theme = shinythemes::shinytheme("superhero"),
                                        img(src = "tuos_blue_logo.png",
                                            height = 50)
                                    ),
-                                   page_title
+                                   page_title,
+                                   helpText("Access, visualise, summarise and extract raster maps of the north-west European Shelf sedimentary environment")
                                ),
                            id = "mode", selected = "view",
                            tabPanel("view"),
@@ -185,7 +186,12 @@ server <- function(input, output, session) {
     
     # ---- raster-layer ----
     raster_layer <- shiny::reactive({
+        req(input$basemap)
+        req(input$mode)
         req(input$opacity)
+        req(input$option)
+        req(input$varname_sed)
+        
         # get varname
         v$varname <- switch(input$mode,
                             "view" =  get_varname(),
@@ -236,11 +242,18 @@ server <- function(input, output, session) {
         map <- base_map()
     })
     
-    # ---- observeEvents ----        
+    # ---- observeEvents ----     
+    shiny::observeEvent(input$basemap, {
+        output$leaflet <- renderLeaflet({
+            map <- base_map()
+        })
+        })
+       
     # ---- render-rasterLayer ----
     shiny::observeEvent({
         input$varname_sed
         input$varname_dis
+        input$basemap
         input$option
         input$opacity}, {
             req(input$opacity)
