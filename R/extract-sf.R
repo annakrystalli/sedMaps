@@ -110,7 +110,7 @@ extr_raster <- function(rst, sf){
     
     
     rst_sf <-  raster::rasterize(sf, rst[[1]]) %>% 
-        setNames("sf_id") %>%
+        stats::setNames("sf_id") %>%
         raster::ratify()
     levels(rst_sf) <- rat
     
@@ -169,7 +169,7 @@ collate_extr_shapes <- function(sf, draw, leaflet_groups){
         draw_sf <- purrr::map(draw$features, 
                               ~drawFeature2sf(.x)) %>% 
             do.call(rbind, .) %>%
-            mutate(id = as.numeric(rownames(.)) + sf_max_id) 
+            dplyr::mutate(id = as.numeric(rownames(.)) + sf_max_id) 
     }else{
         draw_sf <- NULL
     }
@@ -179,7 +179,7 @@ collate_extr_shapes <- function(sf, draw, leaflet_groups){
 
 groom_sf <- function(sf){
     if(is.null(sf)){sf}else{
-    mutate(sf, id = as.integer(id)) %>%
+        dplyr::mutate(sf, id = as.integer(id)) %>%
         dplyr::arrange(id)}
 }
 
@@ -208,6 +208,6 @@ non_finite2na <- function(x){
 
 clean_non_finite <- function(df){
     purrr::map_if(df, is.numeric, ~non_finite2na(.x)) %>%
-        as_tibble() %>% mutate(id = as.integer(id))
+        tibble::as_tibble() %>% dplyr::mutate(id = as.integer(id))
 }
 
