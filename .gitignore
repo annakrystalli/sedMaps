@@ -6,3 +6,4 @@ data-raw/*
 *dev*
 sedmap_shiny/data/*
 !sedmap_shiny/data/metadata
+sedmap_shiny/rsconnect
