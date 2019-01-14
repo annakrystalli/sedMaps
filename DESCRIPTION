@@ -23,7 +23,8 @@ Imports:
     rgdal,
     shinydashboard,
     shinyWidgets,
-    purrr
+    purrr,
+    tibble
 RoxygenNote: 6.1.0
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/annakrystalli/sedMaps
