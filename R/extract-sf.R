@@ -21,7 +21,8 @@ extr_sedmap_data <- function(rst, sf,
                              fun = c("mean", "min", "max", "median", "sd"),
                              sf_crs = FALSE,
                              out_dir,
-                             rst_out_format = c("stack", "tiff")){
+                             rst_out_format = c("stack", "tiff"),
+                             select_sf_csv = FALSE){
     #on.exit(rm(tmp))
     
     if(sf_crs){
@@ -59,6 +60,14 @@ extr_sedmap_data <- function(rst, sf,
         extr_raster(rst, sf) %>%
             rst_export(format = rst_out_format, out_dir = out_dir)
     }
+    sf::st_write(sf, file.path(out_dir, "extraction_sf.geojson"))
+    if(select_sf_csv){
+        sf %>% st_set_geometry(NULL) %>%
+            readr::write_csv(path = file.path(out_dir, "extraction_sf.csv"))
+    }
+}
+
+extr_metadata <- function(rst, sf){
     
 }
 
