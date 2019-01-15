@@ -36,16 +36,18 @@ draw <- structure(list(type = "FeatureCollection",
                                                                .Names = c("type", "coordinates"))),
                                      .Names = c("type", "properties", "geometry")))), .Names = c("type", "features"))
 
+out_sf <- readRDS(system.file("testdata", "out_sf.rds",
+                              package = "sedMaps"))
 
-c("values", "raster")
-
-
+test_that("loaded and drawn collated successfully",
+          {expect_equal(collate_extr_shapes(sf, draw, leaflet_groups = c("draw", "loaded")), out_sf %>% mutate(id = 1:15))})
 
 
 
 tmp <- tempdir()
 out_dir <- file.path(tmp, "out")
 dir.create(out_dir)
+on.exit(rm(out_dir))
 
 extr_sedmap_data(rst, sf, 
                  select_rst = NULL, select_sf = NULL,
@@ -53,6 +55,8 @@ extr_sedmap_data(rst, sf,
                  fun = c("mean", "min", "max", "median", "sd"),
                  out_dir = out_dir)
 
-test_that("multiplication works", {
-  expect_equal(2 * 2, 4)
+test_that("summaries calculated correctly", {
+    expect_equal(list.files(out_dir), "sedmaps_summaries.csv")
+    expect_equal(names(readr::read_csv(file.path(out_dir, "sedmaps_summaries.csv"), col_types = "icdd")),
+                 c("id", "stat", names(rst)))
 })
