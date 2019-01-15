@@ -29,8 +29,74 @@ sed_maps.rds,September,Mean monthly natural disturbance rates in September,area_
 sed_maps.rds,October,Mean monthly natural disturbance rates in October,area_fraction d^-1
 sed_maps.rds,November,Mean monthly natural disturbance rates in November,area_fraction d^-1
 sed_maps.rds,December,Mean monthly natural disturbance rates in December,area_fraction d^-1
-mmo_marine_plan_areas.rds,source,simple feature geometry source,NA
-mmo_marine_plan_areas.rds,id,simple feature geometry identifier,NA
-mmo_marine_plan_areas.rds,descr,simple feature geometry description,NA
-mmo_marine_plan_areas.rds,area,simple feature geometry area,km^2
-mmo_marine_plan_areas.rds,geometry,simple feature geometry,NA
+extraction_sf,source,simple feature geometry source,NA
+extraction_sf,id,simple feature geometry identifier,NA
+extraction_sf,descr,simple feature geometry description,NA
+extraction_sf,area,simple feature geometry area,km^2
+extraction_sf,geometry,simple feature geometry,NA
+sedmaps_summaries.csv,id,simple feature geometry identifier,NA
+sedmaps_summaries.csv,stat,Summary statistic,NA
+sedmaps_summaries.csv,MudPercent,Mud percentage,%
+sedmaps_summaries.csv,SandPercent,Sand percentage,%
+sedmaps_summaries.csv,GravelPercent,Gravel percentage,%
+sedmaps_summaries.csv,TotalD50,Median grain size of the whole sediment,mm
+sedmaps_summaries.csv,SandD50,Median grain size of the sand fraction,mm
+sedmaps_summaries.csv,GravelD50,Median grain size of the gravel fraction,mm
+sedmaps_summaries.csv,Rock10cm,Fraction of area with rock in the top 10 cm of sediment,Fraction
+sedmaps_summaries.csv,Rock50cm,Fraction of area with rock in the top 50 cm of sediment,Fraction
+sedmaps_summaries.csv,Porosity,Porosity of the sediment,unitless
+sedmaps_summaries.csv,Permeability,Permeability of the sediment,m^2
+sedmaps_summaries.csv,POC,Particulate organic carbon content of sediments,%
+sedmaps_summaries.csv,TN,Nitrogen content of sediments,%
+sedmaps_summaries.csv,SurfaceCarbon,Carbon stored in surface sediments,kg C m^-2
+sedmaps_summaries.csv,SurfaceNitrogen,Nitrogen stored in surface sediments,kg N m^-2
+sedmaps_summaries.csv,OrbitalVelMean,Mean orbital velocity at the seabed,ms^-1
+sedmaps_summaries.csv,OrbitalVelMax,Maximum Orbital velocity at the seabed,ms^-1
+sedmaps_summaries.csv,TidalVelMean,Mean depth-average tidal velocity,ms^-1
+sedmaps_summaries.csv,TidalVelMax,Maximum depth-average tidal velocity,ms^-1
+sedmaps_summaries.csv,January,Mean monthly natural disturbance rates in January,area_fraction d^-1
+sedmaps_summaries.csv,February,Mean monthly natural disturbance rates in February,area_fraction d^-1
+sedmaps_summaries.csv,March,Mean monthly natural disturbance rates in March,area_fraction d^-1
+sedmaps_summaries.csv,April,Mean monthly natural disturbance rates in April,area_fraction d^-1
+sedmaps_summaries.csv,May,Mean monthly natural disturbance rates in May,area_fraction d^-1
+sedmaps_summaries.csv,June,Mean monthly natural disturbance rates in June,area_fraction d^-1
+sedmaps_summaries.csv,July,Mean monthly natural disturbance rates in July,area_fraction d^-1
+sedmaps_summaries.csv,August,Mean monthly natural disturbance rates in August,area_fraction d^-1
+sedmaps_summaries.csv,September,Mean monthly natural disturbance rates in September,area_fraction d^-1
+sedmaps_summaries.csv,October,Mean monthly natural disturbance rates in October,area_fraction d^-1
+sedmaps_summaries.csv,November,Mean monthly natural disturbance rates in November,area_fraction d^-1
+sedmaps_summaries.csv,December,Mean monthly natural disturbance rates in December,area_fraction d^-1
+sedmaps_values.csv,id,simple feature geometry identifier,NA
+sedmaps_values.csv,cell,raster cell identifier,NA
+sedmaps_values.csv,x,raster cell center longitude,degrees
+sedmaps_values.csv,y,raster cell center latitude,degrees
+sedmaps_values.csv,MudPercent,Mud percentage,%
+sedmaps_values.csv,SandPercent,Sand percentage,%
+sedmaps_values.csv,GravelPercent,Gravel percentage,%
+sedmaps_values.csv,TotalD50,Median grain size of the whole sediment,mm
+sedmaps_values.csv,SandD50,Median grain size of the sand fraction,mm
+sedmaps_values.csv,GravelD50,Median grain size of the gravel fraction,mm
+sedmaps_values.csv,Rock10cm,Fraction of area with rock in the top 10 cm of sediment,Fraction
+sedmaps_values.csv,Rock50cm,Fraction of area with rock in the top 50 cm of sediment,Fraction
+sedmaps_values.csv,Porosity,Porosity of the sediment,unitless
+sedmaps_values.csv,Permeability,Permeability of the sediment,m^2
+sedmaps_values.csv,POC,Particulate organic carbon content of sediments,%
+sedmaps_values.csv,TN,Nitrogen content of sediments,%
+sedmaps_values.csv,SurfaceCarbon,Carbon stored in surface sediments,kg C m^-2
+sedmaps_values.csv,SurfaceNitrogen,Nitrogen stored in surface sediments,kg N m^-2
+sedmaps_values.csv,OrbitalVelMean,Mean orbital velocity at the seabed,ms^-1
+sedmaps_values.csv,OrbitalVelMax,Maximum Orbital velocity at the seabed,ms^-1
+sedmaps_values.csv,TidalVelMean,Mean depth-average tidal velocity,ms^-1
+sedmaps_values.csv,TidalVelMax,Maximum depth-average tidal velocity,ms^-1
+sedmaps_values.csv,January,Mean monthly natural disturbance rates in January,area_fraction d^-1
+sedmaps_values.csv,February,Mean monthly natural disturbance rates in February,area_fraction d^-1
+sedmaps_values.csv,March,Mean monthly natural disturbance rates in March,area_fraction d^-1
+sedmaps_values.csv,April,Mean monthly natural disturbance rates in April,area_fraction d^-1
+sedmaps_values.csv,May,Mean monthly natural disturbance rates in May,area_fraction d^-1
+sedmaps_values.csv,June,Mean monthly natural disturbance rates in June,area_fraction d^-1
+sedmaps_values.csv,July,Mean monthly natural disturbance rates in July,area_fraction d^-1
+sedmaps_values.csv,August,Mean monthly natural disturbance rates in August,area_fraction d^-1
+sedmaps_values.csv,September,Mean monthly natural disturbance rates in September,area_fraction d^-1
+sedmaps_values.csv,October,Mean monthly natural disturbance rates in October,area_fraction d^-1
+sedmaps_values.csv,November,Mean monthly natural disturbance rates in November,area_fraction d^-1
+sedmaps_values.csv,December,Mean monthly natural disturbance rates in December,area_fraction d^-1
