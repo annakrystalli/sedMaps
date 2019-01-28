@@ -25,7 +25,8 @@ Imports:
     shinyWidgets,
     purrr,
     tibble,
-    stringr
+    stringr,
+    lwgeom
 RoxygenNote: 6.1.0
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/annakrystalli/sedMaps
