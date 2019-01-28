@@ -1,0 +1,25 @@
+[general]
+creator=R package 'raster'
+created=2018-11-30 09:39:41
+[georeference]
+nrows=150
+ncols=210
+xmin=-17
+ymin=44
+xmax=9.25
+ymax=62.75
+projection=+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0
+[data]
+datatype=FLT4S
+byteorder=little
+nbands=2
+bandorder=BIL
+minvalue=0:0.411908954381943
+maxvalue=99.5797119140625:100
+nodatavalue=-3.4e+38
+[legend]
+legendtype=
+values=
+color=
+[description]
+layername=MudPercent:SandPercent
