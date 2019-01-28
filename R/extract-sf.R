@@ -9,6 +9,11 @@
 #'  ignored for points
 #' @param sf_crs whether output data should be converted to the sf crs
 #' @param out_dir path to output directory
+#' @param rst_out_format whether raster data should be return as a `.grd` raster 
+#' stack or individual geoTIFF layers
+#' @param select_sf_csv whether to additionally include extraction sf metadata as in `.csv` format
+#' @param attributes dataspice attributes table 
+#' @param varnames varnames list
 #'
 #' @return outputs written out to `out_dir`.
 #' @export
@@ -22,7 +27,9 @@ extr_sedmap_data <- function(rst, sf,
                              sf_crs = FALSE,
                              out_dir,
                              rst_out_format = c("stack", "tiff"),
-                             select_sf_csv = FALSE){
+                             select_sf_csv = FALSE,
+                             attributes,
+                             varnames){
     #on.exit(rm(tmp))
     
     if(sf_crs){
@@ -48,6 +55,8 @@ extr_sedmap_data <- function(rst, sf,
     fun <- match.arg(fun, several.ok = T)
     rst_out_format <- match.arg(rst_out_format)
     
+    
+    
     if("summaries" %in% output){
         extr_summaries(rst, sf, fun) %>%
             readr::write_csv(path = file.path(out_dir, "sedmaps_summaries.csv"))
@@ -60,16 +69,40 @@ extr_sedmap_data <- function(rst, sf,
         extr_raster(rst, sf) %>%
             rst_export(format = rst_out_format, out_dir = out_dir)
     }
-    sf::st_write(sf, file.path(out_dir, "extraction_sf.geojson"))
+    
+    # ---- create metadata ----
+    dir.create(file.path(out_dir, "metadata"), showWarnings = FALSE)
+    # extract and write attributes
+    extr_attributes(rst, output, attributes, varnames) %>%
+        readr::write_csv(path = file.path(out_dir, "metadata", "attributes.csv"))
+    # write extraction sf as geojson
+    sf::st_write(sf, file.path(out_dir, "metadata", "extraction_sf.geojson"))
+    # write extraction metadata as csv if selected
     if(select_sf_csv){
         sf %>% st_set_geometry(NULL) %>%
-            readr::write_csv(path = file.path(out_dir, "extraction_sf.csv"))
+            readr::write_csv(path = file.path(out_dir, "metadata", "extraction_sf.csv"))
     }
 }
 
-extr_metadata <- function(rst, sf){
+extr_attributes <- function(rst, output, attributes, varnames){
+    output <- c(output, "sf")
+    
+    fileNames <- c(csv = "values",
+      raster = "sed_maps.rds",
+      summaries = "summaries",
+      sf = "extraction_sf")[output]
+    
+    purrr::map_df(fileNames,
+           ~dplyr::filter(attributes, stringr::str_detect(.data$fileName, .x))) %>%
+        dplyr::distinct(.data$variableName, .data$description, .data$unitText) %>%
+        dplyr::filter(!.data$variableName %in% inv_varnames(rst, varnames))
     
 }
+
+inv_varnames <- function(rst, varnames){
+    names(rst)[!names(rst) %in% unlist(varnames)]
+}
+
 
 fun_choices <- function(){
     args(extr_sedmap_data) %>% as.list() %>% 
@@ -96,10 +129,10 @@ extr_summaries <- function(rst, sf,
     fun <- match.arg(fun, choices = fun_choices(),
                      several.ok = TRUE)
     purrr::map_df(fun, 
-                  ~raster::extract(
+                  ~suppressWarnings(raster::extract(
                       rst, sf, 
                       fun = .x, 
-                      na.rm = T) %>%
+                      na.rm = T)) %>%
                       tibble::as.tibble() %>% 
                       dplyr::mutate(id = sf$id, 
                                     stat = .x) %>%

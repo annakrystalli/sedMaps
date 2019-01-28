@@ -78,6 +78,8 @@ download_modal <- function(){
         shiny::textOutput("extr_group_info"),
         shiny::h6("Selected extraction layers"),
         shiny::tableOutput("extr_layer_info"),
+        shiny::helpText("The extraction vector shapes will be included in the download as a geojson vector file. If you would also like extraction metadata in csv format, select below."),
+        shiny::checkboxInput("select_sf_csv", "Extraction metadata as csv?", FALSE),
         shiny::br(),
         shiny::hr(),
         shiny::strong(shiny::h5("Summary statistics")),
@@ -92,6 +94,13 @@ download_modal <- function(){
                                   label = "data format", 
                                   choices = c("csv", "raster"),
                                   inline = T),
+        shiny::conditionalPanel(
+            condition = "input.raw_data_format.includes('raster')",
+            shiny::radioButtons("rst_out_format", 
+                                  label = "Raster file format (if applicable)",
+                                  choices = c("stack", "tiff"),
+                                  inline = TRUE)),
+        shiny::strong(shiny::h5("Metadata")),
         downloadButton("downloadData", label = "Download", class = NULL),
         title = "Download Data", footer = modalButton("Cancel"),
         size = c("m", "s", "l"), easyClose = FALSE)

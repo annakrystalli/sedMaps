@@ -7,7 +7,8 @@
 extr_sedmap_data(rst, sf, select_rst = NULL, select_sf = NULL,
   output = c("summaries", "csv", "raster"), fun = c("mean", "min",
   "max", "median", "sd"), sf_crs = FALSE, out_dir,
-  rst_out_format = c("stack", "tiff"))
+  rst_out_format = c("stack", "tiff"), select_sf_csv = FALSE,
+  attributes, varnames)
 }
 \arguments{
 \item{rst}{sedmaps data raster stack}
@@ -26,6 +27,15 @@ ignored for points}
 \item{sf_crs}{whether output data should be converted to the sf crs}
 
 \item{out_dir}{path to output directory}
+
+\item{rst_out_format}{whether raster data should be return as a \code{.grd} raster
+stack or individual geoTIFF layers}
+
+\item{select_sf_csv}{whether to additionally include extraction sf metadata as in \code{.csv} format}
+
+\item{attributes}{dataspice attributes table}
+
+\item{varnames}{varnames list}
 }
 \value{
 outputs written out to \code{out_dir}.

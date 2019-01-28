@@ -1,12 +1,5 @@
 context("test-extract-sf")
 
-rst <- raster::stack(system.file("testdata", "raster", "sed_maps.grd",
-                          package = "sedMaps"))
-
-sf <- readRDS(system.file("testdata", "sf", "jncc_regional_seas.rds",
-                                package = "sedMaps"))
-
-
 draw <- structure(list(type = "FeatureCollection", 
                        features = list(
                            structure(list(type = "Feature", properties = structure(list(`_leaflet_id` = 171L, 
@@ -43,7 +36,6 @@ test_that("loaded and drawn collated successfully",
           {expect_equal(collate_extr_shapes(sf, draw, leaflet_groups = c("draw", "loaded")), out_sf %>% mutate(id = 1:15))})
 
 
-
 tmp <- tempdir()
 out_dir <- file.path(tmp, "out")
 dir.create(out_dir)
@@ -53,10 +45,15 @@ extr_sedmap_data(rst, sf,
                  select_rst = NULL, select_sf = NULL,
                  output = c("summaries"),
                  fun = c("mean", "min", "max", "median", "sd"),
-                 out_dir = out_dir)
+                 out_dir = out_dir,
+                 rst_out_format = "stack",
+                 select_sf_csv = FALSE,
+                 attributes = get("attributes", envir = as.environment(".GlobalEnv")),
+                 varnames = varnames)
 
 test_that("summaries calculated correctly", {
-    expect_equal(list.files(out_dir), "sedmaps_summaries.csv")
-    expect_equal(names(readr::read_csv(file.path(out_dir, "sedmaps_summaries.csv"), col_types = "icdd")),
+    expect_equal(list.files(out_dir, recursive = T), c("metadata/attributes.csv", "metadata/extraction_sf.geojson", 
+                                                       "sedmaps_summaries.csv"))
+    expect_equal(names(readr::read_csv(file.path(out_dir, "sedmaps_summaries.csv"))),
                  c("id", "stat", names(rst)))
 })

@@ -16,10 +16,6 @@ lflt_basemap <- function(rst, basemap = "Esri.OceanBasemap"){
         addProviderTiles(providers[[basemap]])
 }
 
-
-
-
-
 #' Plot selected rst layer 
 #'
 #' Plot selected rst layer reactively using leafletProxy
