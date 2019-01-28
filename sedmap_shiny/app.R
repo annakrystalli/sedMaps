@@ -364,7 +364,8 @@ server <- function(input, output, session) {
                              out_dir = out_dir, 
                              rst_out_format = input$rst_out_format,
                              select_sf_csv = input$select_sf_csv,
-                             attributes = attributes)
+                             attributes = attributes,
+                             varnames = varnames)
             
             app_wd <- getwd()
             setwd(out_dir)
