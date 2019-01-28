@@ -100,7 +100,6 @@ download_modal <- function(){
                                   label = "Raster file format (if applicable)",
                                   choices = c("stack", "tiff"),
                                   inline = TRUE)),
-        shiny::strong(shiny::h5("Metadata")),
         downloadButton("downloadData", label = "Download", class = NULL),
         title = "Download Data", footer = modalButton("Cancel"),
         size = c("m", "s", "l"), easyClose = FALSE)
