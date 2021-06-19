@@ -1,5 +1,5 @@
 Package: sedMaps
-Version: 0.0.0.9000
+Version: 0.0.1
 Title: Visualise, manipulate and access sediment and disturbance data.
 Description: Visualise, manipulate and access sediment and disturbance data.
 Authors@R: person("Anna", "Krystalli", email = "annakrystalli@googlemail.com", role = c("aut", "cre"))
